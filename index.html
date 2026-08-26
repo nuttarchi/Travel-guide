@@ -30,7 +30,7 @@
           </span>
           
           <h1 id="trip-title-display" contenteditable="true" onblur="saveCurrentTripTitle(this.innerText)" class="text-2xl font-bold mt-2 tracking-wide outline-none hover:bg-white/10 focus:bg-white/20 rounded-lg px-1 transition cursor-pointer" title="กดเพื่อแก้ไขชื่อทริป">
-            Shanghai 2026 🌸
+            กำลังโหลดข้อมูล... 🌸
           </h1>
           
           <div class="mt-2 space-y-1">
@@ -204,7 +204,7 @@
       const app = initializeApp(firebaseConfig);
       db = getDatabase(app);
     } catch(e) {
-      console.warn("Firebase Init Offline Fallback Mode");
+      console.warn("Firebase Offline Mode");
     }
 
     const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -213,36 +213,20 @@
     let currentRoomCode = localStorage.getItem('active_room_code') || "SHA01";
     let firebaseUnsubscribe = null;
 
-    let allTripsLocal = JSON.parse(localStorage.getItem('my_travel_trips')) || {
-      "SHA01": {
-        roomCode: "SHA01",
-        title: "Shanghai 2026 🌸",
-        startDate: "2026-12-03",
-        totalDays: 4,
-        travelerCount: 3,
-        activeDay: 1,
-        itineraryData: { 
-          1: [
-            { id: 1, time: '09:00', detail: 'ทานอาหารเช้าที่ร้านข้าวแกงแนวโรงอาหาร หลังถนน Nanjing' },
-            { id: 2, time: '11:00', detail: 'check-in โรงแรม พักผ่อน' },
-            { id: 3, time: '14:00', detail: 'West nanjing' }
-          ],
-          2: [], 3: [], 4: [] 
-        },
-        expenses: [],
-        checklist: [
-          { id: 1, text: 'หนังสือเดินทาง (Passport) 🛂', done: true },
-          { id: 2, text: 'แลกเงิน 💴', done: true }
-        ],
-        documents: []
-      }
+    let allTripsLocal = JSON.parse(localStorage.getItem('my_travel_trips')) || {};
+
+    let currentTripData = {
+      roomCode: currentRoomCode,
+      title: "Shanghai 2026 🌸",
+      startDate: "2026-12-03",
+      totalDays: 4,
+      travelerCount: 3,
+      activeDay: 1,
+      itineraryData: { 1: [], 2: [], 3: [], 4: [] },
+      expenses: [],
+      checklist: [],
+      documents: []
     };
-
-    if (!allTripsLocal[currentRoomCode]) {
-      allTripsLocal[currentRoomCode] = createBlankTrip(currentRoomCode, "");
-    }
-
-    let currentTripData = allTripsLocal[currentRoomCode];
 
     function createBlankTrip(code, title) {
       const today = new Date().toISOString().split('T')[0];
@@ -272,31 +256,59 @@
       }
     }
 
-    function syncFirebase(roomCode) {
-      if (!db) return;
-      
-      // ยกเลิก Listener ตัวเดิมเพื่อไม่ให้เด้งกลับไปรหัสเก่า
+    function loadAndSyncTrip(roomCode, optionalTitle = "") {
+      currentRoomCode = roomCode;
+      localStorage.setItem('active_room_code', currentRoomCode);
+
+      // 1. ยกเลิก Listener ตัวเก่าทันที
       if (typeof firebaseUnsubscribe === 'function') {
         firebaseUnsubscribe();
         firebaseUnsubscribe = null;
       }
 
-      const tripRef = ref(db, 'trips/' + roomCode);
-      firebaseUnsubscribe = onValue(tripRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data && data.roomCode === roomCode) {
-          currentTripData = data;
-          allTripsLocal[roomCode] = data;
-          localStorage.setItem('my_travel_trips', JSON.stringify(allTripsLocal));
+      // 2. ถ้าในเครื่องมีข้อมูลเดิม ให้แสดงผลชั่วคราวก่อน
+      if (allTripsLocal[roomCode]) {
+        currentTripData = allTripsLocal[roomCode];
+        renderAllUI();
+      }
+
+      // 3. ดึงข้อมูลจาก Firebase มาตรวจสอบ
+      if (db) {
+        const tripRef = ref(db, 'trips/' + roomCode);
+        firebaseUnsubscribe = onValue(tripRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data && data.roomCode === roomCode) {
+            // โหลดทริปเดิมที่มีอยู่บน Firebase
+            currentTripData = data;
+            allTripsLocal[roomCode] = data;
+            localStorage.setItem('my_travel_trips', JSON.stringify(allTripsLocal));
+            renderAllUI();
+          } else {
+            // รหัสนี้ยังไม่มีบน Firebase -> สร้างทริปใหม่ขึ้นมา
+            if (!allTripsLocal[roomCode]) {
+              currentTripData = createBlankTrip(roomCode, optionalTitle);
+            }
+            saveState();
+            renderAllUI();
+          }
+        }, (err) => {
+          console.error("Firebase fetch error:", err);
+          if (!allTripsLocal[roomCode]) {
+            currentTripData = createBlankTrip(roomCode, optionalTitle);
+            saveState();
+          }
           renderAllUI();
-        } else if (!data) {
-          // หากเป็นทริปใหม่ที่ Firebase ยังไม่มี ให้ส่งชุดข้อมูลไปสร้าง
-          set(ref(db, 'trips/' + roomCode), currentTripData);
+        });
+      } else {
+        if (!allTripsLocal[roomCode]) {
+          currentTripData = createBlankTrip(roomCode, optionalTitle);
+          saveState();
         }
-      }, (err) => console.log("Firebase sync error:", err));
+        renderAllUI();
+      }
     }
 
-    // --- Core Action Functions ---
+    // --- Actions ---
     window.handleTripSubmit = function() {
       const codeInput = document.getElementById('modal-room-input').value.trim().toUpperCase();
       const titleInput = document.getElementById('modal-title-input').value.trim();
@@ -306,28 +318,8 @@
         return;
       }
 
-      // 1. สลับรหัสห้องปัจจุบัน
-      currentRoomCode = codeInput;
-      localStorage.setItem('active_room_code', currentRoomCode);
-
-      // 2. ตรวจสอบข้อมูลในเครื่องหรือสร้างทริปใหม่
-      if (!allTripsLocal[currentRoomCode]) {
-        allTripsLocal[currentRoomCode] = createBlankTrip(currentRoomCode, titleInput);
-      } else if (titleInput) {
-        allTripsLocal[currentRoomCode].title = titleInput;
-      }
-
-      currentTripData = allTripsLocal[currentRoomCode];
-
-      // 3. ปิด Modal ทันที
       closeTripModal();
-
-      // 4. บันทึกและเรนเดอร์ UI หน้าใหม่ทันที
-      saveState();
-      renderAllUI();
-
-      // 5. เชื่อมต่อ Firebase สำหรับรหัสใหม่
-      syncFirebase(currentRoomCode);
+      loadAndSyncTrip(codeInput, titleInput);
     };
 
     window.openTripModal = function() {
@@ -638,8 +630,7 @@
     }
 
     // เริ่มต้นระบบ
-    renderAllUI();
-    syncFirebase(currentRoomCode);
+    loadAndSyncTrip(currentRoomCode);
   </script>
 </body>
 </html>
