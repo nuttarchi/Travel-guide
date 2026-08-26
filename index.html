@@ -21,7 +21,7 @@
 
   <div id="app-container" class="w-full max-w-md bg-[#b6e1f4] min-h-screen shadow-2xl flex flex-col relative pb-24">
     
-    <!-- Header -->
+    <!-- ✈️ Header -->
     <div class="bg-[#7aa2ce] text-white p-6 rounded-b-[2.5rem] shadow-md z-10">
       <div class="flex justify-between items-start">
         <div class="flex-1 pr-2">
@@ -42,7 +42,7 @@
           </div>
         </div>
 
-        <!-- Room Code & Add/Switch Trip Button -->
+        <!-- 🔑 Room Code & ปุ่ม Add/Switch Trip -->
         <div class="flex flex-col items-end gap-1.5 shrink-0">
           <div onclick="copyRoomCode()" class="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-center border border-white/30 cursor-pointer hover:bg-white/30 active:scale-95 transition shadow-sm w-full" title="กดเพื่อคัดลอกรหัสห้อง">
             <p class="text-[8px] text-white/90 tracking-wider">ROOM CODE 🔑</p>
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
+    <!-- 🏷️ Navigation Tabs -->
     <div class="flex bg-white mx-4 mt-[-18px] pt-5 pb-2 px-2 rounded-2xl shadow-sm z-0 text-sm font-medium">
       <button onclick="switchTab(1)" id="tab-btn-1" class="flex-1 py-2 text-[#7aa2ce] border-b-2 border-[#7aa2ce] font-bold transition-all">
         📍 แผนเที่ยว
@@ -139,7 +139,7 @@
       </div>
     </div>
 
-    <!-- Room Code Modal (5 Characters) -->
+    <!-- Room Code Modal -->
     <div id="trip-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm" onclick="closeTripModal()">
       <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl space-y-4" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center border-b pb-3">
@@ -155,17 +155,12 @@
 
           <div>
             <label class="block text-xs font-bold text-gray-600 mb-1">ชื่อทริป (กรณีสร้างทริปใหม่):</label>
-            <input type="text" id="modal-title-input" placeholder="เช่น Osaka Trip 2026 🌸" class="w-full p-2.5 bg-gray-50 border border-gray-200 text-xs rounded-xl outline-none focus:border-[#7aa2ce]">
+            <input type="text" id="modal-title-input" placeholder="เช่น Shanghai Trip 2026 🌸" class="w-full p-2.5 bg-gray-50 border border-gray-200 text-xs rounded-xl outline-none focus:border-[#7aa2ce]">
           </div>
 
           <button onclick="handleTripSubmit()" class="w-full py-3 bg-[#7aa2ce] text-white font-bold text-xs rounded-xl shadow-md hover:bg-[#6894c2] active:scale-95 transition-all">
             เข้าสู่ทริป / สร้างทริปใหม่ 🚀
           </button>
-        </div>
-
-        <div class="pt-3 border-t border-gray-100">
-          <p class="text-[11px] font-bold text-gray-500 mb-2">ทริปที่บันทึกไว้ในเครื่องนี้:</p>
-          <div id="saved-trips-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
         </div>
       </div>
     </div>
@@ -189,158 +184,137 @@
 
   </div>
 
-  <script>
+  <!-- Firebase Integration Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // 🔑 ชุด Firebase Config ของคุณ
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-UwBsdoWOOuJn4GKc0Gbmc-Un51txT_s",
+      authDomain: "travel-guide-252535.firebaseapp.com",
+      databaseURL: "https://travel-guide-252535-default-rtdb.firebaseio.com",
+      projectId: "travel-guide-252535",
+      storageBucket: "travel-guide-252535.firebasestorage.app",
+      messagingSenderId: "769845037504",
+      appId: "1:769845037504:web:2cdf3cfba4b67e662da025"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
     const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
     let activeTab = 1;
     let currentRoomCode = "SHA01";
 
-    let allTrips = JSON.parse(localStorage.getItem('my_travel_trips')) || {
-      "SHA01": {
-        roomCode: "SHA01",
-        title: "Shanghai 2026 🌸",
-        startDate: "2026-12-03",
-        totalDays: 4,
-        travelerCount: 3,
-        activeDay: 1,
-        itineraryData: {
-          1: [
-            { id: 1, time: '08:00', detail: '🛬 ถึงสนามบินคันไซ (KIX) ผ่าน ตม.' },
-            { id: 2, time: '10:30', detail: '🏨 ฝากกระเป๋าที่โรงแรม ย่าน Namba' },
-            { id: 3, time: '12:00', detail: '🍜 ทานราเมงข้อสอบ Ichiran' }
-          ],
-          2: [{ id: 4, time: '09:00', detail: '🎢 Universal Studios Japan (USJ)' }],
-          3: [],
-          4: []
-        },
-        expenses: [
-          { id: 1, title: 'โรงแรม 2 คืน 🏨', amount: 6000 },
-          { id: 2, title: 'ค่าซูชิสายพาน 🍣', amount: 1500 }
+    let currentTripData = {
+      roomCode: "SHA01",
+      title: "Shanghai 2026 🌸",
+      startDate: "2026-12-03",
+      totalDays: 4,
+      travelerCount: 3,
+      activeDay: 1,
+      itineraryData: { 
+        1: [
+          { id: 1, time: '09:00', detail: 'ทานอาหารเช้าที่ร้านข้าวแกงแนวโรงอาหาร หลังถนน Nanjing' },
+          { id: 2, time: '11:00', detail: 'check-in โรงแรม พักผ่อน' },
+          { id: 3, time: '14:00', detail: 'West nanjing' }
         ],
-        checklist: [
-          { id: 1, text: 'หนังสือเดินทาง (Passport) 🛂', done: true },
-          { id: 2, text: 'แลกเงินเยน (Yen) 💴', done: true },
-          { id: 3, text: 'ซื้อ Travel eSIM 📱', done: false }
-        ],
-        documents: [
-          { id: 1, name: 'IMG_0887.jpeg', icon: '📄', src: '' }
-        ]
-      }
+        2: [], 3: [], 4: [] 
+      },
+      expenses: [],
+      checklist: [
+        { id: 1, text: 'หนังสือเดินทาง (Passport) 🛂', done: true },
+        { id: 2, text: 'แลกเงินเยน (Yen) 💴', done: true },
+        { id: 3, text: 'ซื้อ Travel eSIM 📱', done: false }
+      ],
+      documents: []
     };
 
-    function getCurrentTrip() {
-      return allTrips[currentRoomCode];
+    // --- Firebase Realtime Sync ---
+    function listenToRoomData(roomCode) {
+      const tripRef = ref(db, 'trips/' + roomCode);
+      onValue(tripRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          currentTripData = data;
+          renderAllUI();
+        } else {
+          saveToFirebase();
+        }
+      });
     }
 
-    function saveState() {
-      localStorage.setItem('my_travel_trips', JSON.stringify(allTrips));
+    function saveToFirebase() {
+      set(ref(db, 'trips/' + currentRoomCode), currentTripData);
     }
 
+    // --- Helpers ---
     function getDateForDay(dayIndex) {
-      const trip = getCurrentTrip();
-      if (!trip.startDate) return '';
-      const d = new Date(trip.startDate);
+      if (!currentTripData.startDate) return '';
+      const d = new Date(currentTripData.startDate);
       d.setDate(d.getDate() + (dayIndex - 1));
       return `${d.getDate()} ${monthsEN[d.getMonth()]}`;
     }
 
     function updateHeaderDateRange() {
-      const trip = getCurrentTrip();
-      if (!trip.startDate) return;
-      const start = new Date(trip.startDate);
-      const end = new Date(trip.startDate);
-      end.setDate(end.getDate() + (trip.totalDays - 1));
+      if (!currentTripData.startDate) return;
+      const start = new Date(currentTripData.startDate);
+      const end = new Date(currentTripData.startDate);
+      end.setDate(end.getDate() + (currentTripData.totalDays - 1));
 
       const startStr = `${start.getDate()} ${monthsEN[start.getMonth()]}`;
       const endStr = `${end.getDate()} ${monthsEN[end.getMonth()]} ${end.getFullYear()}`;
       
-      document.getElementById('date-range-display').innerText = `🗓️ ${startStr} - ${endStr} (${trip.totalDays} วัน)`;
-      document.getElementById('start-date-picker').value = trip.startDate;
+      document.getElementById('date-range-display').innerText = `🗓️ ${startStr} - ${endStr} (${currentTripData.totalDays} วัน)`;
+      document.getElementById('start-date-picker').value = currentTripData.startDate;
     }
 
-    function onStartDateChange(val) {
-      const trip = getCurrentTrip();
-      trip.startDate = val;
-      saveState();
-      updateHeaderDateRange();
-      renderDays();
-    }
+    window.onStartDateChange = function(val) {
+      currentTripData.startDate = val;
+      saveToFirebase();
+    };
 
-    function saveCurrentTripTitle(newTitle) {
-      const trip = getCurrentTrip();
-      trip.title = newTitle.trim() || "ทริปของฉัน 🌸";
-      saveState();
-    }
+    window.saveCurrentTripTitle = function(newTitle) {
+      currentTripData.title = newTitle.trim() || "ทริปของฉัน 🌸";
+      saveToFirebase();
+    };
 
-    function copyRoomCode() {
+    window.copyRoomCode = function() {
       navigator.clipboard.writeText(currentRoomCode).then(() => {
-        alert(`คัดลอกรหัสห้อง [ ${currentRoomCode} ] เรียบร้อยแล้ว! 🔑`);
-      }).catch(() => {
-        alert(`รหัสห้องคือ: ${currentRoomCode}`);
+        alert(`คัดลอกรหัสห้อง [ ${currentRoomCode} ] เรียบร้อยแล้ว! 🔑\nส่งรหัสนี้ให้เพื่อนไปกรอกเพื่อช่วยกันแพลนได้เลยครับ`);
       });
-    }
+    };
 
-    function openTripModal() {
+    window.openTripModal = function() {
       document.getElementById('modal-room-input').value = '';
       document.getElementById('modal-title-input').value = '';
-      renderSavedTripsList();
       document.getElementById('trip-modal').classList.remove('hidden');
-    }
+    };
 
-    function closeTripModal() {
+    window.closeTripModal = function() {
       document.getElementById('trip-modal').classList.add('hidden');
-    }
+    };
 
-    function renderSavedTripsList() {
-      const container = document.getElementById('saved-trips-list');
-      const codes = Object.keys(allTrips);
-      container.innerHTML = codes.map(code => `
-        <div onclick="switchRoomCode('${code}')" class="flex justify-between items-center bg-gray-50 hover:bg-[#b6e1f4]/30 p-2 rounded-xl cursor-pointer border border-gray-100 transition">
-          <span class="font-bold text-xs text-gray-700">${allTrips[code].title}</span>
-          <span class="font-mono text-xs font-bold text-[#7aa2ce] bg-white px-2 py-0.5 rounded-md border">${code}</span>
-        </div>
-      `).join('');
-    }
-
-    function handleTripSubmit() {
+    window.handleTripSubmit = function() {
       const codeInput = document.getElementById('modal-room-input').value.trim().toUpperCase();
       const titleInput = document.getElementById('modal-title-input').value.trim();
 
       if (codeInput.length !== 5) {
-        alert("กรุณากรอก Room Code ให้ครบ 5 หลัก (ตัวอักษรหรือตัวเลข) ครับ!");
+        alert("กรุณากรอก Room Code ให้ครบ 5 หลักครับ!");
         return;
       }
 
-      if (allTrips[codeInput]) {
-        switchRoomCode(codeInput);
-      } else {
-        const newTitle = titleInput || `ทริป ${codeInput} 🌸`;
-        allTrips[codeInput] = {
-          roomCode: codeInput,
-          title: newTitle,
-          startDate: "2026-12-03",
-          totalDays: 3,
-          travelerCount: 2,
-          activeDay: 1,
-          itineraryData: { 1: [], 2: [], 3: [] },
-          expenses: [],
-          checklist: [],
-          documents: []
-        };
-        saveState();
-        switchRoomCode(codeInput);
+      currentRoomCode = codeInput;
+      if (titleInput) {
+        currentTripData.title = titleInput;
       }
-    }
+      closeTripModal();
+      listenToRoomData(currentRoomCode);
+    };
 
-    function switchRoomCode(code) {
-      if (allTrips[code]) {
-        currentRoomCode = code;
-        closeTripModal();
-        renderAllUI();
-      }
-    }
-
-    function switchTab(id) {
+    window.switchTab = function(id) {
       activeTab = id;
       [1, 2, 3].forEach(i => {
         document.getElementById(`tab-${i}`).classList.add('hidden');
@@ -348,14 +322,14 @@
       });
       document.getElementById(`tab-${id}`).classList.remove('hidden');
       document.getElementById(`tab-btn-${id}`).className = "flex-1 py-2 text-[#7aa2ce] border-b-2 border-[#7aa2ce] font-bold transition-all";
-    }
+    };
 
+    // --- Tab 1: Itinerary ---
     function renderDays() {
-      const trip = getCurrentTrip();
       const dayBox = document.getElementById('day-buttons');
       let html = '';
-      for (let day = 1; day <= trip.totalDays; day++) {
-        const isActive = day === trip.activeDay;
+      for (let day = 1; day <= currentTripData.totalDays; day++) {
+        const isActive = day === currentTripData.activeDay;
         const dayDateStr = getDateForDay(day);
         html += `
           <button onclick="changeDay(${day})" class="min-w-[80px] py-2 rounded-2xl text-xs font-bold transition-all flex flex-col items-center justify-center ${
@@ -374,27 +348,22 @@
       dayBox.innerHTML = html;
     }
 
-    function changeDay(day) {
-      const trip = getCurrentTrip();
-      trip.activeDay = day;
-      saveState();
-      renderDays();
-      renderItinerary();
-    }
+    window.changeDay = function(day) {
+      currentTripData.activeDay = day;
+      saveToFirebase();
+    };
 
-    function addNewDay() {
-      const trip = getCurrentTrip();
-      trip.totalDays++;
-      trip.itineraryData[trip.totalDays] = [];
-      saveState();
-      updateHeaderDateRange();
-      changeDay(trip.totalDays);
-    }
+    window.addNewDay = function() {
+      currentTripData.totalDays++;
+      if (!currentTripData.itineraryData) currentTripData.itineraryData = {};
+      currentTripData.itineraryData[currentTripData.totalDays] = [];
+      currentTripData.activeDay = currentTripData.totalDays;
+      saveToFirebase();
+    };
 
     function renderItinerary() {
-      const trip = getCurrentTrip();
       const itemList = document.getElementById('itinerary-list');
-      const items = trip.itineraryData[trip.activeDay] || [];
+      const items = (currentTripData.itineraryData && currentTripData.itineraryData[currentTripData.activeDay]) || [];
       
       if (items.length === 0) {
         itemList.innerHTML = `<div class="text-center py-8 text-xs text-gray-500 bg-white/50 rounded-2xl">ยังไม่มีแผนสำหรับวันนี้ กดปุ่มด้านล่างเพื่อเพิ่มได้เลย ✨</div>`;
@@ -403,57 +372,53 @@
       itemList.innerHTML = items.map((item, index) => `
         <div class="flex items-start gap-2 bg-white p-3 rounded-2xl shadow-sm border-l-4 border-[#7aa2ce]">
           <input type="time" value="${item.time}" onchange="updateTimeSlot(${index}, 'time', this.value)" class="bg-gray-50 border border-gray-200 text-[#7aa2ce] font-bold text-xs rounded-xl p-2 outline-none w-20 text-center">
-          <textarea rows="2" oninput="updateTimeSlot(${index}, 'detail', this.value)" class="w-full bg-transparent text-xs text-gray-700 outline-none resize-none pt-1" placeholder="พิมพ์กิจกรรม...">${item.detail}</textarea>
+          <textarea rows="2" onchange="updateTimeSlot(${index}, 'detail', this.value)" class="w-full bg-transparent text-xs text-gray-700 outline-none resize-none pt-1" placeholder="พิมพ์กิจกรรม...">${item.detail}</textarea>
           <button onclick="removeTimeSlot(${index})" class="text-gray-300 hover:text-red-500 font-bold px-1 text-xs pt-1">✕</button>
         </div>
       `).join('');
     }
 
-    function addTimeSlot() {
-      const trip = getCurrentTrip();
-      if (!trip.itineraryData[trip.activeDay]) trip.itineraryData[trip.activeDay] = [];
-      trip.itineraryData[trip.activeDay].push({ id: Date.now(), time: '12:00', detail: '' });
-      saveState();
-      renderItinerary();
-    }
+    window.addTimeSlot = function() {
+      if (!currentTripData.itineraryData) currentTripData.itineraryData = {};
+      if (!currentTripData.itineraryData[currentTripData.activeDay]) currentTripData.itineraryData[currentTripData.activeDay] = [];
+      currentTripData.itineraryData[currentTripData.activeDay].push({ id: Date.now(), time: '12:00', detail: '' });
+      saveToFirebase();
+    };
 
-    function updateTimeSlot(index, field, value) {
-      const trip = getCurrentTrip();
-      if (trip.itineraryData[trip.activeDay] && trip.itineraryData[trip.activeDay][index]) {
-        trip.itineraryData[trip.activeDay][index][field] = value;
-        saveState();
+    window.updateTimeSlot = function(index, field, value) {
+      if (currentTripData.itineraryData[currentTripData.activeDay][index]) {
+        currentTripData.itineraryData[currentTripData.activeDay][index][field] = value;
+        saveToFirebase();
       }
-    }
+    };
 
-    function removeTimeSlot(index) {
-      const trip = getCurrentTrip();
-      trip.itineraryData[trip.activeDay].splice(index, 1);
-      saveState();
-      renderItinerary();
-    }
+    window.removeTimeSlot = function(index) {
+      currentTripData.itineraryData[currentTripData.activeDay].splice(index, 1);
+      saveToFirebase();
+    };
 
-    function updateTravelerCount(val) {
-      const trip = getCurrentTrip();
-      trip.travelerCount = parseInt(val) || 1;
-      if (trip.travelerCount < 1) trip.travelerCount = 1;
-      saveState();
-      renderExpenses();
-    }
+    // --- Tab 2: Expenses ---
+    window.updateTravelerCount = function(val) {
+      currentTripData.travelerCount = parseInt(val) || 1;
+      if (currentTripData.travelerCount < 1) currentTripData.travelerCount = 1;
+      saveToFirebase();
+    };
 
     function renderExpenses() {
-      const trip = getCurrentTrip();
       const list = document.getElementById('expense-items-list');
-      document.getElementById('traveler-count').value = trip.travelerCount;
+      document.getElementById('traveler-count').value = currentTripData.travelerCount || 1;
 
       let total = 0;
-      trip.expenses.forEach(e => total += e.amount);
+      const expensesList = currentTripData.expenses || [];
+      expensesList.forEach(e => total += e.amount);
 
-      const perPerson = trip.travelerCount > 0 ? total / trip.travelerCount : 0;
+      const count = currentTripData.travelerCount || 1;
+      const perPerson = total / count;
 
       document.getElementById('total-expense').innerText = `฿ ${total.toLocaleString()}`;
       document.getElementById('per-person-expense').innerText = `฿ ${Math.round(perPerson).toLocaleString()}`;
 
-      list.innerHTML = trip.expenses.map((e, index) => `
+      list.innerHTML = expensesList.map((e, index) => `
         <div class="bg-white p-3 rounded-2xl shadow-sm flex justify-between items-center text-xs">
           <span class="font-bold text-gray-800">${e.title}</span>
           <div class="flex items-center gap-2">
@@ -464,8 +429,7 @@
       `).join('');
     }
 
-    function addExpense() {
-      const trip = getCurrentTrip();
+    window.addExpense = function() {
       const titleInput = document.getElementById('exp-title');
       const amountInput = document.getElementById('exp-amount');
 
@@ -473,25 +437,24 @@
       const amount = parseFloat(amountInput.value);
 
       if (title && amount) {
-        trip.expenses.push({ id: Date.now(), title, amount });
-        saveState();
+        if (!currentTripData.expenses) currentTripData.expenses = [];
+        currentTripData.expenses.push({ id: Date.now(), title, amount });
         titleInput.value = '';
         amountInput.value = '';
-        renderExpenses();
+        saveToFirebase();
       }
-    }
+    };
 
-    function removeExpense(index) {
-      const trip = getCurrentTrip();
-      trip.expenses.splice(index, 1);
-      saveState();
-      renderExpenses();
-    }
+    window.removeExpense = function(index) {
+      currentTripData.expenses.splice(index, 1);
+      saveToFirebase();
+    };
 
+    // --- Tab 3: Checklist & Docs ---
     function renderChecklist() {
-      const trip = getCurrentTrip();
       const container = document.getElementById('checklist-container');
-      container.innerHTML = trip.checklist.map((item, index) => `
+      const items = currentTripData.checklist || [];
+      container.innerHTML = items.map((item, index) => `
         <div class="flex items-center justify-between bg-gray-50 p-2.5 rounded-xl border border-gray-100">
           <label class="flex items-center gap-2.5 text-xs text-gray-700 cursor-pointer flex-1">
             <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleCheck(${index})" class="w-4 h-4 accent-[#7aa2ce] rounded">
@@ -502,36 +465,31 @@
       `).join('');
     }
 
-    function toggleCheck(index) {
-      const trip = getCurrentTrip();
-      trip.checklist[index].done = !trip.checklist[index].done;
-      saveState();
-      renderChecklist();
-    }
+    window.toggleCheck = function(index) {
+      currentTripData.checklist[index].done = !currentTripData.checklist[index].done;
+      saveToFirebase();
+    };
 
-    function addChecklistItem() {
-      const trip = getCurrentTrip();
+    window.addChecklistItem = function() {
       const input = document.getElementById('new-check-item');
       const text = input.value.trim();
       if (text) {
-        trip.checklist.push({ id: Date.now(), text, done: false });
-        saveState();
+        if (!currentTripData.checklist) currentTripData.checklist = [];
+        currentTripData.checklist.push({ id: Date.now(), text, done: false });
         input.value = '';
-        renderChecklist();
+        saveToFirebase();
       }
-    }
+    };
 
-    function removeChecklistItem(index) {
-      const trip = getCurrentTrip();
-      trip.checklist.splice(index, 1);
-      saveState();
-      renderChecklist();
-    }
+    window.removeChecklistItem = function(index) {
+      currentTripData.checklist.splice(index, 1);
+      saveToFirebase();
+    };
 
     function renderDocuments() {
-      const trip = getCurrentTrip();
       const grid = document.getElementById('doc-grid');
-      grid.innerHTML = trip.documents.map((doc, index) => `
+      const docs = currentTripData.documents || [];
+      grid.innerHTML = docs.map((doc, index) => `
         <div onclick="openDocModal(${index})" class="relative bg-gray-50 border border-gray-200 p-2 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[#7aa2ce] transition group">
           <button onclick="event.stopPropagation(); removeDocument(${index})" class="absolute top-1 right-1 bg-white/80 hover:bg-red-500 hover:text-white text-gray-400 text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold transition z-10">✕</button>
           ${doc.src 
@@ -543,30 +501,26 @@
       `).join('');
     }
 
-    function uploadDoc(e) {
-      const trip = getCurrentTrip();
+    window.uploadDoc = function(e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
-          trip.documents.push({ id: Date.now(), name: file.name, icon: '📄', src: evt.target.result });
-          saveState();
-          renderDocuments();
+          if (!currentTripData.documents) currentTripData.documents = [];
+          currentTripData.documents.push({ id: Date.now(), name: file.name, icon: '📄', src: evt.target.result });
+          saveToFirebase();
         };
         reader.readAsDataURL(file);
       }
-    }
+    };
 
-    function removeDocument(index) {
-      const trip = getCurrentTrip();
-      trip.documents.splice(index, 1);
-      saveState();
-      renderDocuments();
-    }
+    window.removeDocument = function(index) {
+      currentTripData.documents.splice(index, 1);
+      saveToFirebase();
+    };
 
-    function openDocModal(index) {
-      const trip = getCurrentTrip();
-      const doc = trip.documents[index];
+    window.openDocModal = function(index) {
+      const doc = currentTripData.documents[index];
       if (!doc || !doc.src) {
         alert("ยังไม่มีไฟล์รูปภาพสำหรับเอกสารนี้ครับ สามารถอัปโหลดใหม่ได้เลย ✨");
         return;
@@ -579,13 +533,13 @@
       img.src = doc.src;
       filename.innerText = doc.name;
       modal.classList.remove('hidden');
-    }
+    };
 
-    function closeDocModal() {
+    window.closeDocModal = function() {
       document.getElementById('doc-modal').classList.add('hidden');
-    }
+    };
 
-    function exportToImage() {
+    window.exportToImage = function() {
       const container = document.getElementById('app-container');
       html2canvas(container, { scale: 2, backgroundColor: "#b6e1f4" }).then(canvas => {
         let a = document.createElement('a');
@@ -593,12 +547,11 @@
         a.href = canvas.toDataURL();
         a.click();
       });
-    }
+    };
 
     function renderAllUI() {
-      const trip = getCurrentTrip();
-      document.getElementById('trip-title-display').innerText = trip.title;
-      document.getElementById('room-code-text').innerText = trip.roomCode;
+      document.getElementById('trip-title-display').innerText = currentTripData.title || "Shanghai 2026 🌸";
+      document.getElementById('room-code-text').innerText = currentRoomCode;
       
       updateHeaderDateRange();
       renderDays();
@@ -608,7 +561,8 @@
       renderDocuments();
     }
 
-    renderAllUI();
+    // เริ่มการฟังข้อมูลจาก Firebase
+    listenToRoomData(currentRoomCode);
   </script>
 </body>
 </html>
