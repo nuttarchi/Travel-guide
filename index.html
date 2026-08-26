@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Planner ✈️🌸</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- ไลบรารีสำหรับเซฟหน้าเว็บเป็นรูปภาพ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Prompt', sans-serif; background-color: #f1f5f9; }
+    /* ซ่อน Scrollbar แต่ยังเลื่อนได้ */
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="flex justify-center min-h-screen">
+
+  <!-- Mobile Container: พื้นหลังใช้สีฟ้าอ่อนจากภาพ (#b6e1f4) -->
+  <div id="app-container" class="w-full max-w-md bg-[#b6e1f4] min-h-screen shadow-2xl flex flex-col relative overflow-hidden">
+    
+    <!-- ✈️ Header: ใช้สีฟ้าเข้ม (#7aa2ce) -->
+    <div class="bg-[#7aa2ce] text-white p-6 rounded-b-[2.5rem] shadow-md z-10">
+      <div class="flex justify-between items-start">
+        <div>
+          <span class="bg-[#9abde1] text-white text-[11px] px-3 py-1 rounded-full font-medium shadow-sm">
+            🇯🇵 ทริปต่างประเทศ
+          </span>
+          <h1 class="text-2xl font-bold mt-3 tracking-wide">โอซาก้า - เกียวโต 🌸</h1>
+          <p class="text-white/80 text-sm mt-1">📅 10 - 14 พ.ย. 2026 (5 วัน)</p>
+        </div>
+        <div class="bg-white/20 backdrop-blur-sm px-3 py-2 rounded-xl text-center border border-white/30">
+          <p class="text-[9px] text-white/90 tracking-wider">ROOM CODE 🔑</p>
+          <p class="font-mono text-sm font-bold text-[#fceb9e]">OSAKA88</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🏷️ Navigation Tabs: พื้นหลังขาว -->
+    <div class="flex bg-white mx-4 mt-[-20px] pt-6 pb-2 px-2 rounded-2xl shadow-sm z-0 text-sm font-medium">
+      <button onclick="switchTab(1)" id="tab-btn-1" class="flex-1 py-2 text-[#7aa2ce] border-b-2 border-[#7aa2ce] font-semibold transition-all">
+        📍 แผนเที่ยว
+      </button>
+      <button onclick="switchTab(2)" id="tab-btn-2" class="flex-1 py-2 text-gray-400 hover:text-[#7aa2ce] transition-all">
+        💸 ค่าใช้จ่าย
+      </button>
+      <button onclick="switchTab(3)" id="tab-btn-3" class="flex-1 py-2 text-gray-400 hover:text-[#7aa2ce] transition-all">
+        📁 เอกสาร
+      </button>
+    </div>
+
+    <!-- ------------------------------------------------ -->
+    <!-- 📍 TAB 1: แผนท่องเที่ยว -->
+    <!-- ------------------------------------------------ -->
+    <div id="tab-1" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-24">
+      
+      <!-- Day Selector -->
+      <div class="flex gap-2 overflow-x-auto scrollbar-hide">
+        <!-- ปุ่ม Active ใช้สีเหลืองพาสเทล (#fceb9e) -->
+        <button class="min-w-[80px] py-2.5 rounded-2xl text-xs font-bold bg-[#fceb9e] text-gray-800 shadow-sm border border-[#f5e69e]">
+          Day 1 🌞<br><span class="text-[10px] font-normal text-gray-600">10 พ.ย.</span>
+        </button>
+        <!-- ปุ่ม Inactive ใช้สีฟ้ากลาง (#9abde1) -->
+        <button class="min-w-[80px] py-2.5 rounded-2xl text-xs font-semibold bg-[#9abde1] text-white opacity-80 hover:opacity-100">
+          Day 2 🚅<br><span class="text-[10px] font-normal">11 พ.ย.</span>
+        </button>
+        <button class="min-w-[80px] py-2.5 rounded-2xl text-xs font-semibold bg-[#9abde1] text-white opacity-80 hover:opacity-100">
+          Day 3 ⛩️<br><span class="text-[10px] font-normal">12 พ.ย.</span>
+        </button>
+      </div>
+
+      <!-- Timeline Items -->
+      <div class="space-y-3" id="itinerary-list">
+        <!-- Item 1 -->
+        <div class="flex items-start gap-3 bg-white p-3.5 rounded-2xl shadow-sm border-l-4 border-[#7aa2ce]">
+          <input type="time" value="08:00" class="bg-gray-50 border border-gray-100 text-[#7aa2ce] font-bold text-xs rounded-xl p-2 outline-none w-20 text-center">
+          <textarea rows="2" class="w-full bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none resize-none pt-1" placeholder="พิมพ์กิจกรรม...">🛬 ถึงสนามบินคันไซ (KIX) รับกระเป๋า</textarea>
+        </div>
+        <!-- Item 2 -->
+        <div class="flex items-start gap-3 bg-white p-3.5 rounded-2xl shadow-sm border-l-4 border-[#9abde1]">
+          <input type="time" value="10:30" class="bg-gray-50 border border-gray-100 text-[#7aa2ce] font-bold text-xs rounded-xl p-2 outline-none w-20 text-center">
+          <textarea rows="2" class="w-full bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none resize-none pt-1" placeholder="พิมพ์กิจกรรม...">🏨 นั่งรถไฟเข้าเมือง ฝากกระเป๋าที่โรงแรม</textarea>
+        </div>
+        <!-- Item 3 -->
+        <div class="flex items-start gap-3 bg-white p-3.5 rounded-2xl shadow-sm border-l-4 border-[#b6e1f4]">
+          <input type="time" value="12:00" class="bg-gray-50 border border-gray-100 text-[#7aa2ce] font-bold text-xs rounded-xl p-2 outline-none w-20 text-center">
+          <textarea rows="2" class="w-full bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none resize-none pt-1" placeholder="พิมพ์กิจกรรม...">🍜 ทานราเมงข้อสอบ Ichiran ย่าน Dotonbori</textarea>
+        </div>
+      </div>
+
+      <!-- ปุ่มเพิ่มเวลา สีเหลืองพาสเทล -->
+      <button class="w-full py-3 bg-[#fceb9e] text-gray-800 font-bold text-sm rounded-2xl shadow-sm hover:bg-[#f5e69e] transition-all flex justify-center items-center gap-2">
+        ➕ เพิ่มเวลา / สถานที่
+      </button>
+    </div>
+
+    <!-- ------------------------------------------------ -->
+    <!-- 💸 TAB 2: หารค่าใช้จ่าย -->
+    <!-- ------------------------------------------------ -->
+    <div id="tab-2" class="hidden flex-1 overflow-y-auto px-4 py-4 space-y-5 pb-24">
+      
+      <!-- สรุปยอดรวม -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm text-center">
+        <p class="text-xs text-gray-500 font-semibold">ยอดรวมทริปนี้ 💰</p>
+        <h2 class="text-3xl font-bold text-[#7aa2ce] mt-1">฿ 12,450</h2>
+        <div class="flex justify-center gap-2 mt-3">
+          <span class="bg-[#b6e1f4] text-[#7aa2ce] text-xs px-2 py-1 rounded-lg">🧑 เอ จ่ายไป ฿5,000</span>
+          <span class="bg-[#b6e1f4] text-[#7aa2ce] text-xs px-2 py-1 rounded-lg">👱‍♀️ บี จ่ายไป ฿7,450</span>
+        </div>
+      </div>
+
+      <!-- รายการบิล -->
+      <div class="space-y-3">
+        <h3 class="font-bold text-gray-700 text-sm">รายการค่าใช้จ่าย 🧾</h3>
+        
+        <div class="bg-white p-3 rounded-2xl shadow-sm flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <div class="bg-[#fceb9e] w-10 h-10 rounded-full flex items-center justify-center text-lg">🏨</div>
+            <div>
+              <p class="text-sm font-bold text-gray-800">ค่าโรงแรม 2 คืน</p>
+              <p class="text-xs text-gray-400">จ่ายโดย: 👱‍♀️ บี (หารเท่ากัน)</p>
+            </div>
+          </div>
+          <p class="font-bold text-[#7aa2ce]">฿ 5,000</p>
+        </div>
+
+        <div class="bg-white p-3 rounded-2xl shadow-sm flex justify-between items-center">
+          <div class="bg-[#9abde1] w-10 h-10 rounded-full flex items-center justify-center text-lg text-white">🍣</div>
+          <div class="flex-1 px-3">
+            <p class="text-sm font-bold text-gray-800">ค่าซูชิสายพาน</p>
+            <p class="text-xs text-gray-400">จ่ายโดย: 🧑 เอ (หารเท่ากัน)</p>
+          </div>
+          <p class="font-bold text-[#7aa2ce]">฿ 1,200</p>
+        </div>
+      </div>
+
+      <button class="w-full py-3 bg-[#7aa2ce] text-white font-bold text-sm rounded-2xl shadow-md hover:bg-[#6894c2] transition-all flex justify-center items-center gap-2">
+        ➕ เพิ่มรายการจ่ายเงิน
+      </button>
+    </div>
+
+    <!-- ------------------------------------------------ -->
+    <!-- 📁 TAB 3: เอกสาร & เช็กลิสต์ -->
+    <!-- ------------------------------------------------ -->
+    <div id="tab-3" class="hidden flex-1 overflow-y-auto px-4 py-4 space-y-5 pb-24">
+      
+      <!-- เช็กลิสต์ -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm">
+        <h3 class="font-bold text-gray-700 text-sm mb-3">สิ่งที่ต้องเตรียม 🎒</h3>
+        <div class="space-y-2">
+          <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+            <input type="checkbox" checked class="w-5 h-5 accent-[#7aa2ce] rounded">
+            <span class="text-sm text-gray-700 line-through opacity-60">หนังสือเดินทาง (Passport) 🛂</span>
+          </label>
+          <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+            <input type="checkbox" checked class="w-5 h-5 accent-[#7aa2ce] rounded">
+            <span class="text-sm text-gray-700 line-through opacity-60">แลกเงินเยน (Yen) 💴</span>
+          </label>
+          <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+            <input type="checkbox" class="w-5 h-5 accent-[#7aa2ce] rounded">
+            <span class="text-sm text-gray-700 font-medium">ซื้อ Travel eSIM 📱</span>
+          </label>
+          <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+            <input type="checkbox" class="w-5 h-5 accent-[#7aa2ce] rounded">
+            <span class="text-sm text-gray-700 font-medium">ลงทะเบียน Visit Japan Web 🌐</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- เอกสารสำคัญ -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-bold text-gray-700 text-sm">คลังเอกสาร 📎</h3>
+          <button class="text-[10px] bg-[#9abde1] text-white px-2 py-1 rounded-lg">อัปโหลด +</button>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-gray-50 border border-gray-100 p-3 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-[#b6e1f4] transition">
+            <span class="text-2xl">🎫</span>
+            <span class="text-xs text-gray-600 font-medium">ตั๋วเครื่องบิน</span>
+          </div>
+          <div class="bg-gray-50 border border-gray-100 p-3 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-[#b6e1f4] transition">
+            <span class="text-2xl">🏨</span>
+            <span class="text-xs text-gray-600 font-medium">ใบจองโรงแรม</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📸 Floating Export Button -->
+    <div class="absolute bottom-6 left-0 w-full px-6 flex justify-center pointer-events-none">
+      <button onclick="exportToImage()" class="pointer-events-auto bg-[#7aa2ce] text-white shadow-xl shadow-[#7aa2ce]/40 px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 hover:scale-105 transition-transform border-2 border-white">
+        📸 แคปเจอร์หน้าจอนี้
+      </button>
+    </div>
+
+  </div>
+
+  <!-- JavaScript ควบคุมการทำงาน -->
+  <script>
+    // ฟังก์ชันสลับแท็บ
+    function switchTab(tabId) {
+      // ซ่อนทุกแท็บ
+      document.getElementById('tab-1').classList.add('hidden');
+      document.getElementById('tab-2').classList.add('hidden');
+      document.getElementById('tab-3').classList.add('hidden');
+      
+      // รีเซ็ตสไตล์ปุ่ม
+      for(let i=1; i<=3; i++) {
+        let btn = document.getElementById(`tab-btn-${i}`);
+        btn.classList.remove('text-[#7aa2ce]', 'border-b-2', 'border-[#7aa2ce]');
+        btn.classList.add('text-gray-400');
+      }
+
+      // แสดงแท็บที่เลือก
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      let activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      activeBtn.classList.remove('text-gray-400');
+      activeBtn.classList.add('text-[#7aa2ce]', 'border-b-2', 'border-[#7aa2ce]');
+    }
+
+    // ฟังก์ชันถ่ายรูปหน้าแอป (Export to Image)
+    function exportToImage() {
+      const container = document.getElementById('app-container');
+      
+      // ใช้ html2canvas เปลี่ยน HTML เป็น Canvas
+      html2canvas(container, {
+        scale: 2, // เพิ่มความคมชัด
+        backgroundColor: "#b6e1f4"
+      }).then(canvas => {
+        // สร้างลิงก์สำหรับดาวน์โหลด
+        let link = document.createElement('a');
+        link.download = 'trip-planner.png';
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
+    }
+  </script>
+</body>
+</html>
