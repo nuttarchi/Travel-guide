@@ -30,7 +30,7 @@
           </span>
           
           <h1 id="trip-title-display" contenteditable="true" onblur="saveCurrentTripTitle(this.innerText)" class="text-2xl font-bold mt-2 tracking-wide outline-none hover:bg-white/10 focus:bg-white/20 rounded-lg px-1 transition cursor-pointer" title="กดเพื่อแก้ไขชื่อทริป">
-            กำลังโหลดข้อมูล... 🌸
+            Shanghai 2026 🌸
           </h1>
           
           <div class="mt-2 space-y-1">
@@ -187,12 +187,13 @@
   <!-- Firebase Integration Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+    // 🎯 อัปเดต URL เซิร์ฟเวอร์สิงคโปร์ตรงนี้เรียบร้อยแล้ว
     const firebaseConfig = {
       apiKey: "AIzaSyD-UwBsdoWOOuJn4GKc0Gbmc-Un51txT_s",
       authDomain: "travel-guide-252535.firebaseapp.com",
-      databaseURL: "https://travel-guide-252535-default-rtdb.firebaseio.com",
+      databaseURL: "https://travel-guide-252535-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "travel-guide-252535",
       storageBucket: "travel-guide-252535.firebasestorage.app",
       messagingSenderId: "769845037504",
@@ -204,7 +205,7 @@
       const app = initializeApp(firebaseConfig);
       db = getDatabase(app);
     } catch(e) {
-      console.warn("Firebase Offline Mode");
+      console.warn("Firebase Init Error", e);
     }
 
     const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -214,19 +215,6 @@
     let firebaseUnsubscribe = null;
 
     let allTripsLocal = JSON.parse(localStorage.getItem('my_travel_trips')) || {};
-
-    let currentTripData = {
-      roomCode: currentRoomCode,
-      title: "Shanghai 2026 🌸",
-      startDate: "2026-12-03",
-      totalDays: 4,
-      travelerCount: 3,
-      activeDay: 1,
-      itineraryData: { 1: [], 2: [], 3: [], 4: [] },
-      expenses: [],
-      checklist: [],
-      documents: []
-    };
 
     function createBlankTrip(code, title) {
       const today = new Date().toISOString().split('T')[0];
@@ -246,6 +234,8 @@
       };
     }
 
+    let currentTripData = allTripsLocal[currentRoomCode] || createBlankTrip(currentRoomCode, "");
+
     function saveState() {
       allTripsLocal[currentRoomCode] = currentTripData;
       localStorage.setItem('my_travel_trips', JSON.stringify(allTripsLocal));
@@ -256,56 +246,63 @@
       }
     }
 
-    function loadAndSyncTrip(roomCode, optionalTitle = "") {
+    async function loadAndSyncTrip(roomCode, optionalTitle = "") {
       currentRoomCode = roomCode;
       localStorage.setItem('active_room_code', currentRoomCode);
 
-      // 1. ยกเลิก Listener ตัวเก่าทันที
       if (typeof firebaseUnsubscribe === 'function') {
         firebaseUnsubscribe();
         firebaseUnsubscribe = null;
       }
 
-      // 2. ถ้าในเครื่องมีข้อมูลเดิม ให้แสดงผลชั่วคราวก่อน
+      // แสดงสเกเลตันเบื้องต้นทันที
       if (allTripsLocal[roomCode]) {
         currentTripData = allTripsLocal[roomCode];
         renderAllUI();
       }
 
-      // 3. ดึงข้อมูลจาก Firebase มาตรวจสอบ
       if (db) {
-        const tripRef = ref(db, 'trips/' + roomCode);
-        firebaseUnsubscribe = onValue(tripRef, (snapshot) => {
-          const data = snapshot.val();
-          if (data && data.roomCode === roomCode) {
-            // โหลดทริปเดิมที่มีอยู่บน Firebase
-            currentTripData = data;
-            allTripsLocal[roomCode] = data;
-            localStorage.setItem('my_travel_trips', JSON.stringify(allTripsLocal));
-            renderAllUI();
+        try {
+          const tripRef = ref(db, 'trips/' + roomCode);
+          const snapshot = await get(tripRef);
+          
+          if (snapshot.exists()) {
+            currentTripData = snapshot.val();
           } else {
-            // รหัสนี้ยังไม่มีบน Firebase -> สร้างทริปใหม่ขึ้นมา
-            if (!allTripsLocal[roomCode]) {
-              currentTripData = createBlankTrip(roomCode, optionalTitle);
-            }
-            saveState();
-            renderAllUI();
-          }
-        }, (err) => {
-          console.error("Firebase fetch error:", err);
-          if (!allTripsLocal[roomCode]) {
             currentTripData = createBlankTrip(roomCode, optionalTitle);
-            saveState();
+            await set(tripRef, currentTripData);
           }
+
+          allTripsLocal[roomCode] = currentTripData;
+          localStorage.setItem('my_travel_trips', JSON.stringify(allTripsLocal));
           renderAllUI();
-        });
-      } else {
-        if (!allTripsLocal[roomCode]) {
-          currentTripData = createBlankTrip(roomCode, optionalTitle);
-          saveState();
+
+          firebaseUnsubscribe = onValue(tripRef, (snap) => {
+            const liveData = snap.val();
+            if (liveData && liveData.roomCode === currentRoomCode) {
+              currentTripData = liveData;
+              allTripsLocal[currentRoomCode] = liveData;
+              localStorage.setItem('my_travel_trips', JSON.stringify(allTripsLocal));
+              renderAllUI();
+            }
+          });
+
+        } catch (err) {
+          console.error("Firebase fetch error:", err);
+          fallbackLocalLoad(roomCode, optionalTitle);
         }
-        renderAllUI();
+      } else {
+        fallbackLocalLoad(roomCode, optionalTitle);
       }
+    }
+
+    function fallbackLocalLoad(roomCode, optionalTitle) {
+      if (!allTripsLocal[roomCode]) {
+        allTripsLocal[roomCode] = createBlankTrip(roomCode, optionalTitle);
+      }
+      currentTripData = allTripsLocal[roomCode];
+      saveState();
+      renderAllUI();
     }
 
     // --- Actions ---
