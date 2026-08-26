@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Jorni - Travel Planner</title>
+  <title>Journi - Travel Planner</title>
   
   <!-- ตั้งค่าสำหรับบันทึกลงหน้าจอ Home Screen (มือถือ) -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Jorni">
-  <meta name="application-name" content="Jorni">
-  <link rel="apple-touch-icon" href="jorni.png">
-  <link rel="icon" type="image/png" href="jorni.png">
+  <meta name="apple-mobile-web-app-title" content="Journi">
+  <meta name="application-name" content="Journi">
+  <link rel="apple-touch-icon" href="journi.png">
+  <link rel="icon" type="image/png" href="journi.png">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -33,11 +33,11 @@
     <div class="bg-[#7aa2ce] text-white p-6 rounded-b-[2.5rem] shadow-md z-10">
       <div class="flex justify-between items-start">
         <div class="flex-1 pr-2">
-          <span class="bg-[#9abde1] text-white text-[11px] px-3 py-1 rounded-full font-medium shadow-sm">
-            Travel guide ☘️
-          </span>
           
-          <h1 id="trip-title-display" contenteditable="true" onblur="saveCurrentTripTitle(this.innerText)" class="text-2xl font-bold mt-2 tracking-wide outline-none hover:bg-white/10 focus:bg-white/20 rounded-lg px-1 transition cursor-pointer" title="กดเพื่อแก้ไขชื่อทริป">
+          <!-- โลโก้ Journi มุมซ้ายบน (แทนที่ Travel guide เดิม) -->
+          <img src="journi.png" alt="Journi Logo" class="h-10 w-10 rounded-2xl border-2 border-white bg-white shadow-sm object-cover">
+          
+          <h1 id="trip-title-display" contenteditable="true" onblur="saveCurrentTripTitle(this.innerText)" class="text-2xl font-bold mt-3 tracking-wide outline-none hover:bg-white/10 focus:bg-white/20 rounded-lg px-1 transition cursor-pointer" title="กดเพื่อแก้ไขชื่อทริป">
             Shanghai 2026 🌸
           </h1>
           
