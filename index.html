@@ -2,23 +2,13 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Journi - Travel Planner</title>
-  
-  <!-- ตั้งค่าสำหรับหน้าจอและ Status Bar -->
-  <meta name="theme-color" content="#7aa2ce">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Journi">
-  <meta name="application-name" content="Journi">
-  <link rel="apple-touch-icon" href="journi.png">
-  <link rel="icon" type="image/png" href="journi.png">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Planner ✈️🌸</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ปรับสีพื้นหลัง body เป็นสีฟ้าอ่อนเพื่อให้แถบด้านล่างเนียนไปกับแอป */
-    body { font-family: 'Prompt', sans-serif; background-color: #b6e1f4; }
+    body { font-family: 'Prompt', sans-serif; background-color: #cbd5e1; }
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     input[type="date"]::-webkit-calendar-picker-indicator {
@@ -29,19 +19,21 @@
 </head>
 <body class="flex justify-center min-h-screen">
 
-  <div id="app-container" class="w-full max-w-md bg-[#b6e1f4] min-h-screen shadow-2xl flex flex-col relative pb-8">
+  <div id="app-container" class="w-full max-w-md bg-[#b6e1f4] min-h-screen shadow-2xl flex flex-col relative pb-24">
     
     <!-- ✈️ Header -->
     <div class="bg-[#7aa2ce] text-white p-6 rounded-b-[2.5rem] shadow-md z-10">
-      <div class="flex justify-between items-start gap-3">
-        
-        <!-- ฝั่งซ้าย: Title & Date -->
-        <div class="flex-1 pt-1">
-          <h1 id="trip-title-display" contenteditable="true" onblur="saveCurrentTripTitle(this.innerText)" class="text-2xl font-bold tracking-wide outline-none hover:bg-white/10 focus:bg-white/20 rounded-lg px-2 py-1 -ml-2 transition cursor-pointer" title="กดเพื่อแก้ไขชื่อทริป">
+      <div class="flex justify-between items-start">
+        <div class="flex-1 pr-2">
+          <span class="bg-[#9abde1] text-white text-[11px] px-3 py-1 rounded-full font-medium shadow-sm">
+            Travel guide ☘️
+          </span>
+          
+          <h1 id="trip-title-display" contenteditable="true" onblur="saveCurrentTripTitle(this.innerText)" class="text-2xl font-bold mt-2 tracking-wide outline-none hover:bg-white/10 focus:bg-white/20 rounded-lg px-1 transition cursor-pointer" title="กดเพื่อแก้ไขชื่อทริป">
             Shanghai 2026 🌸
           </h1>
           
-          <div class="mt-3 space-y-1.5 px-1">
+          <div class="mt-2 space-y-1">
             <div class="flex items-center gap-1.5">
               <span class="text-xs text-white/90 font-medium">📅 เริ่มวันแรก:</span>
               <input type="date" id="start-date-picker" onchange="onStartDateChange(this.value)" class="bg-white/20 text-white text-xs font-bold rounded-lg px-2 py-1 border border-white/30 outline-none cursor-pointer hover:bg-white/30 transition">
@@ -50,18 +42,14 @@
           </div>
         </div>
 
-        <!-- ฝั่งขวา: Logo, Room Code & ปุ่ม Add/Switch Trip -->
-        <div class="flex flex-col items-stretch gap-1.5 shrink-0 w-[96px]">
-          
-          <!-- โลโก้ Journi -->
-          <img src="journi.png" alt="Journi Logo" class="w-full aspect-square rounded-xl border-2 border-white bg-white shadow-sm object-cover">
-          
-          <div onclick="copyRoomCode()" class="bg-white/20 backdrop-blur-sm py-1.5 rounded-xl text-center border border-white/30 cursor-pointer hover:bg-white/30 active:scale-95 transition shadow-sm w-full" title="กดเพื่อคัดลอกรหัสห้อง">
+        <!-- 🔑 Room Code & ปุ่ม Add/Switch Trip -->
+        <div class="flex flex-col items-end gap-1.5 shrink-0">
+          <div onclick="copyRoomCode()" class="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-center border border-white/30 cursor-pointer hover:bg-white/30 active:scale-95 transition shadow-sm w-full" title="กดเพื่อคัดลอกรหัสห้อง">
             <p class="text-[8px] text-white/90 tracking-wider">ROOM CODE 🔑</p>
-            <p class="font-mono text-sm font-bold text-[#fceb9e]" id="room-code-text">SHA01</p>
+            <p class="font-mono text-xs font-bold text-[#fceb9e]" id="room-code-text">SHA01</p>
           </div>
           
-          <button onclick="openTripModal()" class="bg-[#fceb9e] hover:bg-[#f5e69e] text-gray-800 text-[10px] font-bold py-1.5 rounded-xl shadow-sm active:scale-95 transition flex items-center justify-center gap-1 w-full">
+          <button onclick="openTripModal()" class="bg-[#fceb9e] hover:bg-[#f5e69e] text-gray-800 text-[10px] font-bold px-2.5 py-1 rounded-xl shadow-sm active:scale-95 transition flex items-center gap-1">
             <span>➕</span> สลับ/เพิ่มทริป
           </button>
         </div>
@@ -187,17 +175,24 @@
       </div>
     </div>
 
+    <!-- Export Button -->
+    <div class="fixed bottom-3 left-0 w-full px-6 flex justify-center z-20 pointer-events-none">
+      <button onclick="exportToImage()" class="pointer-events-auto bg-[#7aa2ce] text-white shadow-xl px-6 py-3 rounded-full font-bold text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-transform border-2 border-white">
+        📸 แคปเจอร์หน้าจอนี้
+      </button>
+    </div>
+
   </div>
 
-  <!-- Firebase Integration Script -->
+  <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD-UwBsdoWOOuJn4GKc0Gbmc-Un51txT_s",
       authDomain: "travel-guide-252535.firebaseapp.com",
-      databaseURL: "https://travel-guide-252535-default-rtdb.asia-southeast1.firebasedatabase.app",
+      databaseURL: "https://travel-guide-252535-default-rtdb.firebaseio.com",
       projectId: "travel-guide-252535",
       storageBucket: "travel-guide-252535.firebasestorage.app",
       messagingSenderId: "769845037504",
@@ -209,7 +204,7 @@
       const app = initializeApp(firebaseConfig);
       db = getDatabase(app);
     } catch(e) {
-      console.warn("Firebase Init Error", e);
+      console.warn("Firebase Offline Mode");
     }
 
     const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -238,6 +233,32 @@
       };
     }
 
+    // กำหนดค่าเริ่มต้นทริปแรก
+    if (!allTripsLocal["SHA01"]) {
+      allTripsLocal["SHA01"] = {
+        roomCode: "SHA01",
+        title: "Shanghai 2026 🌸",
+        startDate: "2026-12-03",
+        totalDays: 4,
+        travelerCount: 3,
+        activeDay: 1,
+        itineraryData: { 
+          1: [
+            { id: 1, time: '09:00', detail: 'ทานอาหารเช้าที่ร้านข้าวแกงแนวโรงอาหาร หลังถนน Nanjing' },
+            { id: 2, time: '11:00', detail: 'check-in โรงแรม พักผ่อน' },
+            { id: 3, time: '14:00', detail: 'West nanjing' }
+          ],
+          2: [], 3: [], 4: [] 
+        },
+        expenses: [],
+        checklist: [
+          { id: 1, text: 'หนังสือเดินทาง (Passport) 🛂', done: true },
+          { id: 2, text: 'แลกเงิน 💴', done: true }
+        ],
+        documents: []
+      };
+    }
+
     let currentTripData = allTripsLocal[currentRoomCode] || createBlankTrip(currentRoomCode, "");
 
     function saveState() {
@@ -250,62 +271,46 @@
       }
     }
 
-    async function loadAndSyncTrip(roomCode, optionalTitle = "") {
+    function loadAndSyncTrip(roomCode, optionalTitle = "") {
       currentRoomCode = roomCode;
       localStorage.setItem('active_room_code', currentRoomCode);
 
+      // 1. ยกเลิก Listener ตัวเก่า
       if (typeof firebaseUnsubscribe === 'function') {
         firebaseUnsubscribe();
         firebaseUnsubscribe = null;
       }
 
-      if (allTripsLocal[roomCode]) {
-        currentTripData = allTripsLocal[roomCode];
-        renderAllUI();
+      // 2. เรนเดอร์หน้าจอทันที (Synchronous Render) เพื่อไม่ให้ติดค้าง
+      if (!allTripsLocal[roomCode]) {
+        allTripsLocal[roomCode] = createBlankTrip(roomCode, optionalTitle);
+      } else if (optionalTitle) {
+        allTripsLocal[roomCode].title = optionalTitle;
       }
+      
+      currentTripData = allTripsLocal[roomCode];
+      saveState();
+      renderAllUI(); // แสดงผลทันที!
 
+      // 3. ดึงและซิงค์ Firebase ในเบื้องหลัง
       if (db) {
         try {
           const tripRef = ref(db, 'trips/' + roomCode);
-          const snapshot = await get(tripRef);
-          
-          if (snapshot.exists()) {
-            currentTripData = snapshot.val();
-          } else {
-            currentTripData = createBlankTrip(roomCode, optionalTitle);
-            await set(tripRef, currentTripData);
-          }
-
-          allTripsLocal[roomCode] = currentTripData;
-          localStorage.setItem('my_travel_trips', JSON.stringify(allTripsLocal));
-          renderAllUI();
-
-          firebaseUnsubscribe = onValue(tripRef, (snap) => {
-            const liveData = snap.val();
-            if (liveData && liveData.roomCode === currentRoomCode) {
-              currentTripData = liveData;
-              allTripsLocal[currentRoomCode] = liveData;
+          firebaseUnsubscribe = onValue(tripRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.roomCode === roomCode) {
+              currentTripData = data;
+              allTripsLocal[roomCode] = data;
               localStorage.setItem('my_travel_trips', JSON.stringify(allTripsLocal));
               renderAllUI();
+            } else if (!data) {
+              set(ref(db, 'trips/' + roomCode), currentTripData);
             }
-          });
-
-        } catch (err) {
-          console.error("Firebase fetch error:", err);
-          fallbackLocalLoad(roomCode, optionalTitle);
+          }, (err) => console.log("Firebase sync notice:", err));
+        } catch(e) {
+          console.log("Firebase error:", e);
         }
-      } else {
-        fallbackLocalLoad(roomCode, optionalTitle);
       }
-    }
-
-    function fallbackLocalLoad(roomCode, optionalTitle) {
-      if (!allTripsLocal[roomCode]) {
-        allTripsLocal[roomCode] = createBlankTrip(roomCode, optionalTitle);
-      }
-      currentTripData = allTripsLocal[roomCode];
-      saveState();
-      renderAllUI();
     }
 
     // --- Actions ---
@@ -607,6 +612,16 @@
       document.getElementById('doc-modal').classList.add('hidden');
     };
 
+    window.exportToImage = function() {
+      const container = document.getElementById('app-container');
+      html2canvas(container, { scale: 2, backgroundColor: "#b6e1f4" }).then(canvas => {
+        let a = document.createElement('a');
+        a.download = `${currentRoomCode}-trip-plan.png`;
+        a.href = canvas.toDataURL();
+        a.click();
+      });
+    };
+
     function renderAllUI() {
       document.getElementById('trip-title-display').innerText = currentTripData.title || `ทริป ${currentRoomCode} 🌸`;
       document.getElementById('room-code-text').innerText = currentRoomCode;
@@ -619,7 +634,7 @@
       renderDocuments();
     }
 
-    // เริ่มการทำงาน
+    // เริ่มต้นระบบ
     loadAndSyncTrip(currentRoomCode);
   </script>
 </body>
