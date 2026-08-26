@@ -21,7 +21,7 @@
 
   <div id="app-container" class="w-full max-w-md bg-[#b6e1f4] min-h-screen shadow-2xl flex flex-col relative pb-24">
     
-    <!-- Header -->
+    <!-- ✈️ Header -->
     <div class="bg-[#7aa2ce] text-white p-6 rounded-b-[2.5rem] shadow-md z-10">
       <div class="flex justify-between items-start">
         <div class="flex-1 pr-2">
@@ -42,7 +42,7 @@
           </div>
         </div>
 
-        <!-- Room Code & Add/Switch Trip Button -->
+        <!-- 🔑 Room Code & ปุ่ม Add/Switch Trip -->
         <div class="flex flex-col items-end gap-1.5 shrink-0">
           <div onclick="copyRoomCode()" class="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-center border border-white/30 cursor-pointer hover:bg-white/30 active:scale-95 transition shadow-sm w-full" title="กดเพื่อคัดลอกรหัสห้อง">
             <p class="text-[8px] text-white/90 tracking-wider">ROOM CODE 🔑</p>
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
+    <!-- 🏷️ Navigation Tabs -->
     <div class="flex bg-white mx-4 mt-[-18px] pt-5 pb-2 px-2 rounded-2xl shadow-sm z-0 text-sm font-medium">
       <button onclick="switchTab(1)" id="tab-btn-1" class="flex-1 py-2 text-[#7aa2ce] border-b-2 border-[#7aa2ce] font-bold transition-all">
         📍 แผนเที่ยว
@@ -199,18 +199,51 @@
       appId: "1:769845037504:web:2cdf3cfba4b67e662da025"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    let db = null;
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getDatabase(app);
+    } catch(e) {
+      console.warn("Firebase Init Offline Fallback Mode");
+    }
 
     const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
     let activeTab = 1;
-    let currentRoomCode = "SHA01";
-    let currentUnsubscribe = null;
+    let currentRoomCode = localStorage.getItem('active_room_code') || "SHA01";
+    let firebaseUnsubscribe = null;
 
-    let currentTripData = {};
+    let allTripsLocal = JSON.parse(localStorage.getItem('my_travel_trips')) || {
+      "SHA01": {
+        roomCode: "SHA01",
+        title: "Shanghai 2026 🌸",
+        startDate: "2026-12-03",
+        totalDays: 4,
+        travelerCount: 3,
+        activeDay: 1,
+        itineraryData: { 
+          1: [
+            { id: 1, time: '09:00', detail: 'ทานอาหารเช้าที่ร้านข้าวแกงแนวโรงอาหาร หลังถนน Nanjing' },
+            { id: 2, time: '11:00', detail: 'check-in โรงแรม พักผ่อน' },
+            { id: 3, time: '14:00', detail: 'West nanjing' }
+          ],
+          2: [], 3: [], 4: [] 
+        },
+        expenses: [],
+        checklist: [
+          { id: 1, text: 'หนังสือเดินทาง (Passport) 🛂', done: true },
+          { id: 2, text: 'แลกเงิน 💴', done: true }
+        ],
+        documents: []
+      }
+    };
 
-    // ฟังก์ชันสร้างแม่แบบทริปว่างสำหรับโค้ดใหม่
+    if (!allTripsLocal[currentRoomCode]) {
+      allTripsLocal[currentRoomCode] = createBlankTrip(currentRoomCode, "");
+    }
+
+    let currentTripData = allTripsLocal[currentRoomCode];
+
     function createBlankTrip(code, title) {
       const today = new Date().toISOString().split('T')[0];
       return {
@@ -223,45 +256,118 @@
         itineraryData: { 1: [], 2: [], 3: [] },
         expenses: [],
         checklist: [
-          { id: 1, text: 'หนังสือเดินทาง (Passport) 🛂', done: false },
-          { id: 2, text: 'แลกเงิน 💴', done: false }
+          { id: 1, text: 'หนังสือเดินทาง (Passport) 🛂', done: false }
         ],
         documents: []
       };
     }
 
-    // --- Firebase Realtime Sync ---
-    function listenToRoomData(roomCode, optionalTitle = "") {
-      // ยกเลิก Listener เก่าเพื่อป้องกันข้อมูลซ้อนกัน
-      if (currentUnsubscribe) {
-        currentUnsubscribe();
+    function saveState() {
+      allTripsLocal[currentRoomCode] = currentTripData;
+      localStorage.setItem('my_travel_trips', JSON.stringify(allTripsLocal));
+      localStorage.setItem('active_room_code', currentRoomCode);
+      
+      if (db) {
+        try { set(ref(db, 'trips/' + currentRoomCode), currentTripData); } catch(e){}
+      }
+    }
+
+    function syncFirebase(roomCode) {
+      if (!db) return;
+      
+      // ยกเลิก Listener ตัวเดิมเพื่อไม่ให้เด้งกลับไปรหัสเก่า
+      if (typeof firebaseUnsubscribe === 'function') {
+        firebaseUnsubscribe();
+        firebaseUnsubscribe = null;
       }
 
       const tripRef = ref(db, 'trips/' + roomCode);
-      
-      currentUnsubscribe = onValue(tripRef, (snapshot) => {
+      firebaseUnsubscribe = onValue(tripRef, (snapshot) => {
         const data = snapshot.val();
-        if (data) {
-          // มีข้อมูลทริปนี้ในเซิร์ฟเวอร์อยู่แล้ว -> โหลดขึ้นมาแสดงผล
+        if (data && data.roomCode === roomCode) {
           currentTripData = data;
-        } else {
-          // โค้ดใหม่ที่ยังไม่มีในเซิร์ฟเวอร์ -> สร้างทริปว่างขึ้นมาใหม่
-          currentTripData = createBlankTrip(roomCode, optionalTitle);
+          allTripsLocal[roomCode] = data;
+          localStorage.setItem('my_travel_trips', JSON.stringify(allTripsLocal));
+          renderAllUI();
+        } else if (!data) {
+          // หากเป็นทริปใหม่ที่ Firebase ยังไม่มี ให้ส่งชุดข้อมูลไปสร้าง
           set(ref(db, 'trips/' + roomCode), currentTripData);
         }
-        renderAllUI();
-      }, (error) => {
-        console.error("Firebase Sync Error:", error);
-      });
+      }, (err) => console.log("Firebase sync error:", err));
     }
 
-    function saveToFirebase() {
-      if (currentRoomCode) {
-        set(ref(db, 'trips/' + currentRoomCode), currentTripData);
+    // --- Core Action Functions ---
+    window.handleTripSubmit = function() {
+      const codeInput = document.getElementById('modal-room-input').value.trim().toUpperCase();
+      const titleInput = document.getElementById('modal-title-input').value.trim();
+
+      if (codeInput.length !== 5) {
+        alert("กรุณากรอก Room Code ให้ครบ 5 หลักครับ!");
+        return;
       }
-    }
 
-    // --- Helpers ---
+      // 1. สลับรหัสห้องปัจจุบัน
+      currentRoomCode = codeInput;
+      localStorage.setItem('active_room_code', currentRoomCode);
+
+      // 2. ตรวจสอบข้อมูลในเครื่องหรือสร้างทริปใหม่
+      if (!allTripsLocal[currentRoomCode]) {
+        allTripsLocal[currentRoomCode] = createBlankTrip(currentRoomCode, titleInput);
+      } else if (titleInput) {
+        allTripsLocal[currentRoomCode].title = titleInput;
+      }
+
+      currentTripData = allTripsLocal[currentRoomCode];
+
+      // 3. ปิด Modal ทันที
+      closeTripModal();
+
+      // 4. บันทึกและเรนเดอร์ UI หน้าใหม่ทันที
+      saveState();
+      renderAllUI();
+
+      // 5. เชื่อมต่อ Firebase สำหรับรหัสใหม่
+      syncFirebase(currentRoomCode);
+    };
+
+    window.openTripModal = function() {
+      document.getElementById('modal-room-input').value = '';
+      document.getElementById('modal-title-input').value = '';
+      document.getElementById('trip-modal').classList.remove('hidden');
+    };
+
+    window.closeTripModal = function() {
+      document.getElementById('trip-modal').classList.add('hidden');
+    };
+
+    window.onStartDateChange = function(val) {
+      currentTripData.startDate = val;
+      saveState();
+      renderAllUI();
+    };
+
+    window.saveCurrentTripTitle = function(newTitle) {
+      currentTripData.title = newTitle.trim() || "ทริปของฉัน 🌸";
+      saveState();
+    };
+
+    window.copyRoomCode = function() {
+      navigator.clipboard.writeText(currentRoomCode).then(() => {
+        alert(`คัดลอกรหัสห้อง [ ${currentRoomCode} ] เรียบร้อยแล้ว! 🔑`);
+      });
+    };
+
+    window.switchTab = function(id) {
+      activeTab = id;
+      [1, 2, 3].forEach(i => {
+        document.getElementById(`tab-${i}`).classList.add('hidden');
+        document.getElementById(`tab-btn-${i}`).className = "flex-1 py-2 text-gray-400 hover:text-[#7aa2ce] transition-all";
+      });
+      document.getElementById(`tab-${id}`).classList.remove('hidden');
+      document.getElementById(`tab-btn-${id}`).className = "flex-1 py-2 text-[#7aa2ce] border-b-2 border-[#7aa2ce] font-bold transition-all";
+    };
+
+    // --- Helpers & Renders ---
     function getDateForDay(dayIndex) {
       if (!currentTripData.startDate) return '';
       const d = new Date(currentTripData.startDate);
@@ -283,57 +389,6 @@
       document.getElementById('start-date-picker').value = currentTripData.startDate;
     }
 
-    window.onStartDateChange = function(val) {
-      currentTripData.startDate = val;
-      saveToFirebase();
-    };
-
-    window.saveCurrentTripTitle = function(newTitle) {
-      currentTripData.title = newTitle.trim() || "ทริปของฉัน 🌸";
-      saveToFirebase();
-    };
-
-    window.copyRoomCode = function() {
-      navigator.clipboard.writeText(currentRoomCode).then(() => {
-        alert(`คัดลอกรหัสห้อง [ ${currentRoomCode} ] เรียบร้อยแล้ว! 🔑\nส่งรหัสนี้ให้เพื่อนนำไปกรอกเพื่อร่วมแพลนทริปได้เลยครับ`);
-      });
-    };
-
-    window.openTripModal = function() {
-      document.getElementById('modal-room-input').value = '';
-      document.getElementById('modal-title-input').value = '';
-      document.getElementById('trip-modal').classList.remove('hidden');
-    };
-
-    window.closeTripModal = function() {
-      document.getElementById('trip-modal').classList.add('hidden');
-    };
-
-    window.handleTripSubmit = function() {
-      const codeInput = document.getElementById('modal-room-input').value.trim().toUpperCase();
-      const titleInput = document.getElementById('modal-title-input').value.trim();
-
-      if (codeInput.length !== 5) {
-        alert("กรุณากรอก Room Code ให้ครบ 5 หลักครับ!");
-        return;
-      }
-
-      currentRoomCode = codeInput;
-      closeTripModal();
-      listenToRoomData(currentRoomCode, titleInput);
-    };
-
-    window.switchTab = function(id) {
-      activeTab = id;
-      [1, 2, 3].forEach(i => {
-        document.getElementById(`tab-${i}`).classList.add('hidden');
-        document.getElementById(`tab-btn-${i}`).className = "flex-1 py-2 text-gray-400 hover:text-[#7aa2ce] transition-all";
-      });
-      document.getElementById(`tab-${id}`).classList.remove('hidden');
-      document.getElementById(`tab-btn-${id}`).className = "flex-1 py-2 text-[#7aa2ce] border-b-2 border-[#7aa2ce] font-bold transition-all";
-    };
-
-    // --- Tab 1: Itinerary ---
     function renderDays() {
       const dayBox = document.getElementById('day-buttons');
       let html = '';
@@ -362,7 +417,8 @@
 
     window.changeDay = function(day) {
       currentTripData.activeDay = day;
-      saveToFirebase();
+      saveState();
+      renderAllUI();
     };
 
     window.addNewDay = function() {
@@ -370,7 +426,8 @@
       if (!currentTripData.itineraryData) currentTripData.itineraryData = {};
       currentTripData.itineraryData[currentTripData.totalDays] = [];
       currentTripData.activeDay = currentTripData.totalDays;
-      saveToFirebase();
+      saveState();
+      renderAllUI();
     };
 
     function renderItinerary() {
@@ -396,28 +453,30 @@
       if (!currentTripData.itineraryData) currentTripData.itineraryData = {};
       if (!currentTripData.itineraryData[activeDay]) currentTripData.itineraryData[activeDay] = [];
       currentTripData.itineraryData[activeDay].push({ id: Date.now(), time: '12:00', detail: '' });
-      saveToFirebase();
+      saveState();
+      renderAllUI();
     };
 
     window.updateTimeSlot = function(index, field, value) {
       const activeDay = currentTripData.activeDay || 1;
       if (currentTripData.itineraryData[activeDay][index]) {
         currentTripData.itineraryData[activeDay][index][field] = value;
-        saveToFirebase();
+        saveState();
       }
     };
 
     window.removeTimeSlot = function(index) {
       const activeDay = currentTripData.activeDay || 1;
       currentTripData.itineraryData[activeDay].splice(index, 1);
-      saveToFirebase();
+      saveState();
+      renderAllUI();
     };
 
-    // --- Tab 2: Expenses ---
+    // Expenses
     window.updateTravelerCount = function(val) {
       currentTripData.travelerCount = parseInt(val) || 1;
-      if (currentTripData.travelerCount < 1) currentTripData.travelerCount = 1;
-      saveToFirebase();
+      saveState();
+      renderExpenses();
     };
 
     function renderExpenses() {
@@ -448,7 +507,6 @@
     window.addExpense = function() {
       const titleInput = document.getElementById('exp-title');
       const amountInput = document.getElementById('exp-amount');
-
       const title = titleInput.value.trim();
       const amount = parseFloat(amountInput.value);
 
@@ -457,16 +515,18 @@
         currentTripData.expenses.push({ id: Date.now(), title, amount });
         titleInput.value = '';
         amountInput.value = '';
-        saveToFirebase();
+        saveState();
+        renderExpenses();
       }
     };
 
     window.removeExpense = function(index) {
       currentTripData.expenses.splice(index, 1);
-      saveToFirebase();
+      saveState();
+      renderExpenses();
     };
 
-    // --- Tab 3: Checklist & Docs ---
+    // Checklist & Docs
     function renderChecklist() {
       const container = document.getElementById('checklist-container');
       const items = currentTripData.checklist || [];
@@ -483,7 +543,8 @@
 
     window.toggleCheck = function(index) {
       currentTripData.checklist[index].done = !currentTripData.checklist[index].done;
-      saveToFirebase();
+      saveState();
+      renderChecklist();
     };
 
     window.addChecklistItem = function() {
@@ -493,13 +554,15 @@
         if (!currentTripData.checklist) currentTripData.checklist = [];
         currentTripData.checklist.push({ id: Date.now(), text, done: false });
         input.value = '';
-        saveToFirebase();
+        saveState();
+        renderChecklist();
       }
     };
 
     window.removeChecklistItem = function(index) {
       currentTripData.checklist.splice(index, 1);
-      saveToFirebase();
+      saveState();
+      renderChecklist();
     };
 
     function renderDocuments() {
@@ -524,7 +587,8 @@
         reader.onload = function(evt) {
           if (!currentTripData.documents) currentTripData.documents = [];
           currentTripData.documents.push({ id: Date.now(), name: file.name, icon: '📄', src: evt.target.result });
-          saveToFirebase();
+          saveState();
+          renderDocuments();
         };
         reader.readAsDataURL(file);
       }
@@ -532,7 +596,8 @@
 
     window.removeDocument = function(index) {
       currentTripData.documents.splice(index, 1);
-      saveToFirebase();
+      saveState();
+      renderDocuments();
     };
 
     window.openDocModal = function(index) {
@@ -541,14 +606,9 @@
         alert("ยังไม่มีไฟล์รูปภาพสำหรับเอกสารนี้ครับ สามารถอัปโหลดใหม่ได้เลย ✨");
         return;
       }
-      
-      const modal = document.getElementById('doc-modal');
-      const img = document.getElementById('modal-img');
-      const filename = document.getElementById('modal-filename');
-
-      img.src = doc.src;
-      filename.innerText = doc.name;
-      modal.classList.remove('hidden');
+      document.getElementById('modal-img').src = doc.src;
+      document.getElementById('modal-filename').innerText = doc.name;
+      document.getElementById('doc-modal').classList.remove('hidden');
     };
 
     window.closeDocModal = function() {
@@ -577,8 +637,9 @@
       renderDocuments();
     }
 
-    // เริ่มการฟังข้อมูลจาก Firebase
-    listenToRoomData(currentRoomCode);
+    // เริ่มต้นระบบ
+    renderAllUI();
+    syncFirebase(currentRoomCode);
   </script>
 </body>
 </html>
