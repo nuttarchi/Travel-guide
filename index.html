@@ -84,7 +84,7 @@
       </div>
     </div>
 
-    <!-- 🏷️ Navigation Tabs (ปรับขนาดตัวหนังสือให้อ่านง่ายพอดี 4 แท็บ) -->
+    <!-- 🏷️ Navigation Tabs -->
     <div class="flex bg-white mx-3 mt-[-18px] pt-5 pb-2 px-1 rounded-2xl shadow-sm z-0 text-xs font-medium gap-1">
       <button onclick="switchTab(1)" id="tab-btn-1" class="flex-1 py-2 text-[#7aa2ce] border-b-2 border-[#7aa2ce] font-bold transition-all text-center">
         📍 แผนเที่ยว
@@ -170,168 +170,317 @@
       </div>
     </div>
 
-    <!-- TAB 4: Vocabulary (คำศัพท์จีน) -->
+    <!-- TAB 4: Vocabulary (คำศัพท์) -->
     <div id="tab-4" class="hidden flex-1 overflow-y-auto px-4 py-4 space-y-4">
       
-      <!-- หมวดการถามทาง -->
-      <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
-        <h3 class="font-bold text-[#7aa2ce] text-sm flex items-center gap-1.5 border-b pb-2 border-gray-100">
-          <span>🗺️</span> การถามทาง
-        </h3>
-        <div class="overflow-x-auto scrollbar-hide">
-          <table class="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr class="bg-gray-50 text-gray-600 font-bold border-b border-gray-100">
-                <th class="p-2 rounded-l-lg">ภาษาจีน</th>
-                <th class="p-2">พินอิน</th>
-                <th class="p-2">คำอ่าน</th>
-                <th class="p-2 rounded-r-lg">คำแปล</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-50 text-gray-700">
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">请问……在哪里？</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Qǐngwèn… zài nǎlǐ?</td>
-                <td class="p-2">ฉิ่งเวิ่น… ไจ้ หนาหลี่</td>
-                <td class="p-2 font-medium">ขอถามหน่อย…อยู่ที่ไหน</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">地铁站在在哪里？</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Dìtiě zhàn zài nǎlǐ?</td>
-                <td class="p-2">ตี้เถี่ยจ้าน ไจ้ หนาหลี่</td>
-                <td class="p-2 font-medium">สถานีรถไฟฟ้าอยู่ที่ไหน</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">这个地方怎么走？</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Zhège dìfāng zěnme zǒu?</td>
-                <td class="p-2">เจ้อเก้อ ตี้ฟาง เจิ่นเมอะ โจ่ว</td>
-                <td class="p-2 font-medium">ที่นี่ไปยังไง</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">往左 / 往右</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Wǎng zuǒ / Wǎng yòu</td>
-                <td class="p-2">หวั่งจั๋ว / หวั่งโย่ว</td>
-                <td class="p-2 font-medium">เลี้ยวซ้าย / เลี้ยวขวา</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">一直走</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Yīzhí zǒu</td>
-                <td class="p-2">อี๋จื๋อโจ่ว</td>
-                <td class="p-2 font-medium">เดินตรงไป</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">远不远？</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Yuǎn bù yuǎn?</td>
-                <td class="p-2">หย่วนปู้หย่วน</td>
-                <td class="p-2 font-medium">ไกลไหม</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">附近有没有……？</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Fùjìn yǒu méiyǒu…?</td>
-                <td class="p-2">ฟู่จิ้น โหย่ว เหมยโหย่ว</td>
-                <td class="p-2 font-medium">แถวนี้มี…ไหม</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">你可以带我去那里吗？</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Nǐ kěyǐ dài wǒ qù nàlǐ ma?</td>
-                <td class="p-2">หนี่เขออี่ ไต้หว่อ ชวี่ หน่าหลี่ มะ</td>
-                <td class="p-2 font-medium">คุณช่วยพาฉันไปที่นั่นได้ไหม</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">我迷路了，可以帮我吗？</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Wǒ mílù le, kěyǐ bāng wǒ ma?</td>
-                <td class="p-2">หว่อ หมิลู่ เลอ เขออี่ ปางหว่อ มะ</td>
-                <td class="p-2 font-medium">ฉันหลงทาง ช่วยฉันหน่อยได้ไหม</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">最近的医院在哪里？</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Zuìjìn de yīyuàn zài nǎlǐ?</td>
-                <td class="p-2">จุ้ยจิ้น เตอ อี๋เยวี่ยน ไจ้ หนาหลี่</td>
-                <td class="p-2 font-medium">โรงพยาบาลที่ใกล้ที่สุดอยู่ที่ไหน</td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- 🌐 Dropdown เลือกภาษา -->
+      <div class="bg-white p-3.5 rounded-2xl shadow-sm flex items-center justify-between gap-2">
+        <label for="vocab-lang-select" class="text-xs font-bold text-gray-700 flex items-center gap-1.5 shrink-0">
+          <span>🌐</span> เลือกภาษา:
+        </label>
+        <select id="vocab-lang-select" onchange="switchVocabLang(this.value)" class="bg-gray-50 border border-gray-200 text-xs font-bold text-[#7aa2ce] rounded-xl px-3 py-2 outline-none focus:border-[#7aa2ce] cursor-pointer w-full max-w-[180px]">
+          <option value="zh">🇨🇳 จีน (Chinese)</option>
+          <option value="ja">🇯🇵 ญี่ปุ่น (Japanese)</option>
+        </select>
+      </div>
+
+      <!-- 🇨🇳 หมวดภาษาจีน -->
+      <div id="vocab-zh" class="space-y-4">
+        <!-- การถามทาง -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
+          <h3 class="font-bold text-[#7aa2ce] text-sm flex items-center gap-1.5 border-b pb-2 border-gray-100">
+            <span>🗺️</span> การถามทาง (ภาษาจีน)
+          </h3>
+          <div class="overflow-x-auto scrollbar-hide">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-gray-50 text-gray-600 font-bold border-b border-gray-100">
+                  <th class="p-2 rounded-l-lg">ภาษาจีน</th>
+                  <th class="p-2">พินอิน</th>
+                  <th class="p-2">คำอ่าน</th>
+                  <th class="p-2 rounded-r-lg">คำแปล</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50 text-gray-700">
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">请问……在哪里？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Qǐngwèn… zài nǎlǐ?</td>
+                  <td class="p-2">ฉิ่งเวิ่น… ไจ้ หนาหลี่</td>
+                  <td class="p-2 font-medium">ขอถามหน่อย…อยู่ที่ไหน</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">地铁站在在哪里？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Dìtiě zhàn zài nǎlǐ?</td>
+                  <td class="p-2">ตี้เถี่ยจ้าน ไจ้ หนาหลี่</td>
+                  <td class="p-2 font-medium">สถานีรถไฟฟ้าอยู่ที่ไหน</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">这个地方怎么走？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Zhège dìfāng zěnme zǒu?</td>
+                  <td class="p-2">เจ้อเก้อ ตี้ฟาง เจิ่นเมอะ โจ่ว</td>
+                  <td class="p-2 font-medium">ที่นี่ไปยังไง</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">往左 / 往右</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Wǎng zuǒ / Wǎng yòu</td>
+                  <td class="p-2">หวั่งจั๋ว / หวั่งโย่ว</td>
+                  <td class="p-2 font-medium">เลี้ยวซ้าย / เลี้ยวขวา</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">一直走</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Yīzhí zǒu</td>
+                  <td class="p-2">อี๋จื๋อโจ่ว</td>
+                  <td class="p-2 font-medium">เดินตรงไป</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">远不远？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Yuǎn bù yuǎn?</td>
+                  <td class="p-2">หย่วนปู้หย่วน</td>
+                  <td class="p-2 font-medium">ไกลไหม</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">附近有没有……？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Fùjìn yǒu méiyǒu…?</td>
+                  <td class="p-2">ฟู่จิ้น โหย่ว เหมยโหย่ว</td>
+                  <td class="p-2 font-medium">แถวนี้มี…ไหม</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">你可以带我去那里吗？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Nǐ kěyǐ dài wǒ qù nàlǐ ma?</td>
+                  <td class="p-2">หนี่เขออี่ ไต้หว่อ ชวี่ หน่าหลี่ มะ</td>
+                  <td class="p-2 font-medium">คุณช่วยพาฉันไปที่นั่นได้ไหม</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">我迷路了，可以帮我吗？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Wǒ mílù le, kěyǐ bāng wǒ ma?</td>
+                  <td class="p-2">หว่อ หมิลู่ เลอ เขออี่ ปางหว่อ มะ</td>
+                  <td class="p-2 font-medium">ฉันหลงทาง ช่วยฉันหน่อยได้ไหม</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">最近的医院在哪里？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Zuìjìn de yīyuàn zài nǎlǐ?</td>
+                  <td class="p-2">จุ้ยจิ้น เตอ อี๋เยวี่ยน ไจ้ หนาหลี่</td>
+                  <td class="p-2 font-medium">โรงพยาบาลที่ใกล้ที่สุดอยู่ที่ไหน</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- การสั่งอาหาร -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
+          <h3 class="font-bold text-[#7aa2ce] text-sm flex items-center gap-1.5 border-b pb-2 border-gray-100">
+            <span>🥢</span> การสั่งอาหาร (ภาษาจีน)
+          </h3>
+          <div class="overflow-x-auto scrollbar-hide">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-gray-50 text-gray-600 font-bold border-b border-gray-100">
+                  <th class="p-2 rounded-l-lg">ภาษาจีน</th>
+                  <th class="p-2">พินอิน</th>
+                  <th class="p-2">คำอ่าน</th>
+                  <th class="p-2 rounded-r-lg">คำแปล</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50 text-gray-700">
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">我想点菜</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Wǒ xiǎng diǎn cài</td>
+                  <td class="p-2">หว่อ เสี่ยง เตี่ยน ไช่</td>
+                  <td class="p-2 font-medium">ฉันต้องการสั่งอาหาร</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">这个是什么？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Zhège shì shénme?</td>
+                  <td class="p-2">เจ้อเก้อ ซื่อ เสินเมอะ</td>
+                  <td class="p-2 font-medium">นี่คืออะไร</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">我要这个</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Wǒ yào zhège</td>
+                  <td class="p-2">หว่อ เย่า เจ้อเก้อ</td>
+                  <td class="p-2 font-medium">ฉันเอาอันนี้</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">有没有菜单？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Yǒu méiyǒu càidān?</td>
+                  <td class="p-2">โหย่ว เหมยโหย่ว ไช่ตาน</td>
+                  <td class="p-2 font-medium">มีเมนูไหม</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">请不要辣</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Qǐng bù yào là</td>
+                  <td class="p-2">ฉิ่ง ปู๋ เย่า ล่า</td>
+                  <td class="p-2 font-medium">กรุณาไม่ใส่เผ็ด</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">我要一杯水</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Wǒ yào yī bēi shuǐ</td>
+                  <td class="p-2">หว่อ เย่า อีเปย สุ่ย</td>
+                  <td class="p-2 font-medium">ขอแก้วน้ำเปล่าหนึ่งแก้ว</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">可以打包吗？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Kěyǐ dǎbāo ma?</td>
+                  <td class="p-2">เขออี่ ต่าปาว มะ</td>
+                  <td class="p-2 font-medium">ห่อกลับบ้านได้ไหม</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">买单</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Mǎidān</td>
+                  <td class="p-2">หม่ายตาน</td>
+                  <td class="p-2 font-medium">คิดเงินเลย</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">请快一点</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Qǐng kuài yīdiǎn</td>
+                  <td class="p-2">ฉิ่ง ไคว้ อีเตี่ยน</td>
+                  <td class="p-2 font-medium">กรุณาเร็วหน่อย</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">这道菜好吃！</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Zhè dào cài hǎochī!</td>
+                  <td class="p-2">เจ้อ เต้า ไช่ ห่าวชือ</td>
+                  <td class="p-2 font-medium">เมนูนี้อร่อย!</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- หมวดการสั่งอาหาร -->
-      <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
-        <h3 class="font-bold text-[#7aa2ce] text-sm flex items-center gap-1.5 border-b pb-2 border-gray-100">
-          <span>🥢</span> การสั่งอาหาร
-        </h3>
-        <div class="overflow-x-auto scrollbar-hide">
-          <table class="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr class="bg-gray-50 text-gray-600 font-bold border-b border-gray-100">
-                <th class="p-2 rounded-l-lg">ภาษาจีน</th>
-                <th class="p-2">พินอิน</th>
-                <th class="p-2">คำอ่าน</th>
-                <th class="p-2 rounded-r-lg">คำแปล</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-50 text-gray-700">
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">我想点菜</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Wǒ xiǎng diǎn cài</td>
-                <td class="p-2">หว่อ เสี่ยง เตี่ยน ไช่</td>
-                <td class="p-2 font-medium">ฉันต้องการสั่งอาหาร</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">这个是什么？</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Zhège shì shénme?</td>
-                <td class="p-2">เจ้อเก้อ ซื่อ เสินเมอะ</td>
-                <td class="p-2 font-medium">นี่คืออะไร</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">我要这个</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Wǒ yào zhège</td>
-                <td class="p-2">หว่อ เย่า เจ้อเก้อ</td>
-                <td class="p-2 font-medium">ฉันเอาอันนี้</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">有没有菜单？</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Yǒu méiyǒu càidān?</td>
-                <td class="p-2">โหย่ว เหมยโหย่ว ไช่ตาน</td>
-                <td class="p-2 font-medium">มีเมนูไหม</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">请不要辣</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Qǐng bù yào là</td>
-                <td class="p-2">ฉิ่ง ปู๋ เย่า ล่า</td>
-                <td class="p-2 font-medium">กรุณาไม่ใส่เผ็ด</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">我要一杯水</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Wǒ yào yī bēi shuǐ</td>
-                <td class="p-2">หว่อ เย่า อีเปย สุ่ย</td>
-                <td class="p-2 font-medium">ขอแก้วน้ำเปล่าหนึ่งแก้ว</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">可以打包吗？</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Kěyǐ dǎbāo ma?</td>
-                <td class="p-2">เขออี่ ต่าปาว มะ</td>
-                <td class="p-2 font-medium">ห่อกลับบ้านได้ไหม</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">买单</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Mǎidān</td>
-                <td class="p-2">หม่ายตาน</td>
-                <td class="p-2 font-medium">คิดเงินเลย</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">请快一点</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Qǐng kuài yīdiǎn</td>
-                <td class="p-2">ฉิ่ง ไคว้ อีเตี่ยน</td>
-                <td class="p-2 font-medium">กรุณาเร็วหน่อย</td>
-              </tr>
-              <tr>
-                <td class="p-2 font-medium text-[#7aa2ce]">这道菜好吃！</td>
-                <td class="p-2 text-gray-500 font-mono text-[11px]">Zhè dào cài hǎochī!</td>
-                <td class="p-2">เจ้อ เต้า ไช่ ห่าวชือ</td>
-                <td class="p-2 font-medium">เมนูนี้อร่อย!</td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- 🇯🇵 หมวดภาษาญี่ปุ่น -->
+      <div id="vocab-ja" class="hidden space-y-4">
+        <!-- การถามทาง -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
+          <h3 class="font-bold text-[#7aa2ce] text-sm flex items-center gap-1.5 border-b pb-2 border-gray-100">
+            <span>🗺️</span> การถามทาง (ภาษาญี่ปุ่น)
+          </h3>
+          <div class="overflow-x-auto scrollbar-hide">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-gray-50 text-gray-600 font-bold border-b border-gray-100">
+                  <th class="p-2 rounded-l-lg">ภาษาญี่ปุ่น</th>
+                  <th class="p-2">โรมาจิ</th>
+                  <th class="p-2">คำอ่าน</th>
+                  <th class="p-2 rounded-r-lg">คำแปล</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50 text-gray-700">
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">すみません、…はどこですか？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Sumimasen, … wa doko desu ka?</td>
+                  <td class="p-2">ซูมิมาเซน, … วะ โดโกะ เดส กะ</td>
+                  <td class="p-2 font-medium">ขอโทษนะ…อยู่ที่ไหน</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">駅はどこですか？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Eki wa doko desu ka?</td>
+                  <td class="p-2">เอะกิ วะ โดโกะ เดส กะ</td>
+                  <td class="p-2 font-medium">สถานีรถไฟอยู่ที่ไหน</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">ここへはどう行きますか？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Koko e wa dō ikimasu ka?</td>
+                  <td class="p-2">โคโกะ เอะ วะ โด อิคิมัส กะ</td>
+                  <td class="p-2 font-medium">ไปที่นี่นี่ยังไง</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">左 / 右</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Hidari / Migi</td>
+                  <td class="p-2">ฮิดาริ / มิกิ</td>
+                  <td class="p-2 font-medium">ซ้าย / ขวา</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">まっすぐ行ってください</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Massugu itte kudasai</td>
+                  <td class="p-2">มัสสุกุ อิเตะ คูดาไซ</td>
+                  <td class="p-2 font-medium">เดินตรงไป</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">遠いですか？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Tōi desu ka?</td>
+                  <td class="p-2">โทอิ เดส กะ</td>
+                  <td class="p-2 font-medium">ไกลไหม</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">近くに…はありますか？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Chikaku ni … wa arimasu ka?</td>
+                  <td class="p-2">ชิกากุ นิ … วะ อาริมัส กะ</td>
+                  <td class="p-2 font-medium">แถวนี้มี…ไหม</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">迷子になりました</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Maigo ni narimashita</td>
+                  <td class="p-2">ไมโกะ นิ นาริมาชิตะ</td>
+                  <td class="p-2 font-medium">ฉันหลงทาง</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- การสั่งอาหาร -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
+          <h3 class="font-bold text-[#7aa2ce] text-sm flex items-center gap-1.5 border-b pb-2 border-gray-100">
+            <span>🍣</span> การสั่งอาหาร (ภาษาญี่ปุ่น)
+          </h3>
+          <div class="overflow-x-auto scrollbar-hide">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-gray-50 text-gray-600 font-bold border-b border-gray-100">
+                  <th class="p-2 rounded-l-lg">ภาษาญี่ปุ่น</th>
+                  <th class="p-2">โรมาจิ</th>
+                  <th class="p-2">คำอ่าน</th>
+                  <th class="p-2 rounded-r-lg">คำแปล</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50 text-gray-700">
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">注文をお願いします</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Chūmon o negaishimasu</td>
+                  <td class="p-2">ชูมง โอะ เนไกชิมัส</td>
+                  <td class="p-2 font-medium">ขอสั่งอาหารหน่อยครับ/ค่ะ</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">これは何ですか？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Kore wa nan desu ka?</td>
+                  <td class="p-2">โคเระ วะ นัน เดส กะ</td>
+                  <td class="p-2 font-medium">นี่คืออะไร</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">これをください</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Kore o kudasai</td>
+                  <td class="p-2">โคเระ โอะ คูดาไซ</td>
+                  <td class="p-2 font-medium">ขออันนี้ครับ/ค่ะ</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">メニューはありますか？</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Menyū wa arimasu ka?</td>
+                  <td class="p-2">เมนิว วะ อาริมัส กะ</td>
+                  <td class="p-2 font-medium">มีเมนูไหม</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">お会計をお願いします</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Okaikei o negaishimasu</td>
+                  <td class="p-2">โอไคเค โอะ เนไกชิมัส</td>
+                  <td class="p-2 font-medium">คิดเงินด้วยครับ/ค่ะ</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">お持ち帰りで</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Omochikaeri de</td>
+                  <td class="p-2">โอโมจิคาเอริ เดะ</td>
+                  <td class="p-2 font-medium">ห่อกลับบ้าน</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-[#7aa2ce]">おいしいです！</td>
+                  <td class="p-2 text-gray-500 font-mono text-[11px]">Oishii desu!</td>
+                  <td class="p-2">โออิชิ เดส!</td>
+                  <td class="p-2 font-medium">อร่อยมาก!</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -543,6 +692,17 @@
       });
       document.getElementById(`tab-${id}`).classList.remove('hidden');
       document.getElementById(`tab-btn-${id}`).className = "flex-1 py-2 text-[#7aa2ce] border-b-2 border-[#7aa2ce] font-bold transition-all text-xs text-center";
+    };
+
+    window.switchVocabLang = function(lang) {
+      document.getElementById('vocab-zh').classList.add('hidden');
+      document.getElementById('vocab-ja').classList.add('hidden');
+
+      if (lang === 'zh') {
+        document.getElementById('vocab-zh').classList.remove('hidden');
+      } else if (lang === 'ja') {
+        document.getElementById('vocab-ja').classList.remove('hidden');
+      }
     };
 
     // --- Helpers & Renders ---
