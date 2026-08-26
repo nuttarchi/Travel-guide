@@ -21,7 +21,7 @@
 
   <div id="app-container" class="w-full max-w-md bg-[#b6e1f4] min-h-screen shadow-2xl flex flex-col relative pb-24">
     
-    <!-- ✈️ Header -->
+    <!-- Header -->
     <div class="bg-[#7aa2ce] text-white p-6 rounded-b-[2.5rem] shadow-md z-10">
       <div class="flex justify-between items-start">
         <div class="flex-1 pr-2">
@@ -42,7 +42,7 @@
           </div>
         </div>
 
-        <!-- 🔑 Room Code & ปุ่ม Add/Switch Trip -->
+        <!-- Room Code & Add/Switch Trip Button -->
         <div class="flex flex-col items-end gap-1.5 shrink-0">
           <div onclick="copyRoomCode()" class="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-center border border-white/30 cursor-pointer hover:bg-white/30 active:scale-95 transition shadow-sm w-full" title="กดเพื่อคัดลอกรหัสห้อง">
             <p class="text-[8px] text-white/90 tracking-wider">ROOM CODE 🔑</p>
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <!-- 🏷️ Navigation Tabs -->
+    <!-- Navigation Tabs -->
     <div class="flex bg-white mx-4 mt-[-18px] pt-5 pb-2 px-2 rounded-2xl shadow-sm z-0 text-sm font-medium">
       <button onclick="switchTab(1)" id="tab-btn-1" class="flex-1 py-2 text-[#7aa2ce] border-b-2 border-[#7aa2ce] font-bold transition-all">
         📍 แผนเที่ยว
@@ -189,7 +189,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // 🔑 ชุด Firebase Config ของคุณ
     const firebaseConfig = {
       apiKey: "AIzaSyD-UwBsdoWOOuJn4GKc0Gbmc-Un51txT_s",
       authDomain: "travel-guide-252535.firebaseapp.com",
@@ -207,47 +206,59 @@
     
     let activeTab = 1;
     let currentRoomCode = "SHA01";
+    let currentUnsubscribe = null;
 
-    let currentTripData = {
-      roomCode: "SHA01",
-      title: "Shanghai 2026 🌸",
-      startDate: "2026-12-03",
-      totalDays: 4,
-      travelerCount: 3,
-      activeDay: 1,
-      itineraryData: { 
-        1: [
-          { id: 1, time: '09:00', detail: 'ทานอาหารเช้าที่ร้านข้าวแกงแนวโรงอาหาร หลังถนน Nanjing' },
-          { id: 2, time: '11:00', detail: 'check-in โรงแรม พักผ่อน' },
-          { id: 3, time: '14:00', detail: 'West nanjing' }
+    let currentTripData = {};
+
+    // ฟังก์ชันสร้างแม่แบบทริปว่างสำหรับโค้ดใหม่
+    function createBlankTrip(code, title) {
+      const today = new Date().toISOString().split('T')[0];
+      return {
+        roomCode: code,
+        title: title || `ทริป ${code} 🌸`,
+        startDate: today,
+        totalDays: 3,
+        travelerCount: 2,
+        activeDay: 1,
+        itineraryData: { 1: [], 2: [], 3: [] },
+        expenses: [],
+        checklist: [
+          { id: 1, text: 'หนังสือเดินทาง (Passport) 🛂', done: false },
+          { id: 2, text: 'แลกเงิน 💴', done: false }
         ],
-        2: [], 3: [], 4: [] 
-      },
-      expenses: [],
-      checklist: [
-        { id: 1, text: 'หนังสือเดินทาง (Passport) 🛂', done: true },
-        { id: 2, text: 'แลกเงินเยน (Yen) 💴', done: true },
-        { id: 3, text: 'ซื้อ Travel eSIM 📱', done: false }
-      ],
-      documents: []
-    };
+        documents: []
+      };
+    }
 
     // --- Firebase Realtime Sync ---
-    function listenToRoomData(roomCode) {
+    function listenToRoomData(roomCode, optionalTitle = "") {
+      // ยกเลิก Listener เก่าเพื่อป้องกันข้อมูลซ้อนกัน
+      if (currentUnsubscribe) {
+        currentUnsubscribe();
+      }
+
       const tripRef = ref(db, 'trips/' + roomCode);
-      onValue(tripRef, (snapshot) => {
+      
+      currentUnsubscribe = onValue(tripRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
+          // มีข้อมูลทริปนี้ในเซิร์ฟเวอร์อยู่แล้ว -> โหลดขึ้นมาแสดงผล
           currentTripData = data;
-          renderAllUI();
         } else {
-          saveToFirebase();
+          // โค้ดใหม่ที่ยังไม่มีในเซิร์ฟเวอร์ -> สร้างทริปว่างขึ้นมาใหม่
+          currentTripData = createBlankTrip(roomCode, optionalTitle);
+          set(ref(db, 'trips/' + roomCode), currentTripData);
         }
+        renderAllUI();
+      }, (error) => {
+        console.error("Firebase Sync Error:", error);
       });
     }
 
     function saveToFirebase() {
-      set(ref(db, 'trips/' + currentRoomCode), currentTripData);
+      if (currentRoomCode) {
+        set(ref(db, 'trips/' + currentRoomCode), currentTripData);
+      }
     }
 
     // --- Helpers ---
@@ -262,12 +273,13 @@
       if (!currentTripData.startDate) return;
       const start = new Date(currentTripData.startDate);
       const end = new Date(currentTripData.startDate);
-      end.setDate(end.getDate() + (currentTripData.totalDays - 1));
+      const totalDays = currentTripData.totalDays || 1;
+      end.setDate(end.getDate() + (totalDays - 1));
 
       const startStr = `${start.getDate()} ${monthsEN[start.getMonth()]}`;
       const endStr = `${end.getDate()} ${monthsEN[end.getMonth()]} ${end.getFullYear()}`;
       
-      document.getElementById('date-range-display').innerText = `🗓️ ${startStr} - ${endStr} (${currentTripData.totalDays} วัน)`;
+      document.getElementById('date-range-display').innerText = `🗓️ ${startStr} - ${endStr} (${totalDays} วัน)`;
       document.getElementById('start-date-picker').value = currentTripData.startDate;
     }
 
@@ -283,7 +295,7 @@
 
     window.copyRoomCode = function() {
       navigator.clipboard.writeText(currentRoomCode).then(() => {
-        alert(`คัดลอกรหัสห้อง [ ${currentRoomCode} ] เรียบร้อยแล้ว! 🔑\nส่งรหัสนี้ให้เพื่อนไปกรอกเพื่อช่วยกันแพลนได้เลยครับ`);
+        alert(`คัดลอกรหัสห้อง [ ${currentRoomCode} ] เรียบร้อยแล้ว! 🔑\nส่งรหัสนี้ให้เพื่อนนำไปกรอกเพื่อร่วมแพลนทริปได้เลยครับ`);
       });
     };
 
@@ -307,11 +319,8 @@
       }
 
       currentRoomCode = codeInput;
-      if (titleInput) {
-        currentTripData.title = titleInput;
-      }
       closeTripModal();
-      listenToRoomData(currentRoomCode);
+      listenToRoomData(currentRoomCode, titleInput);
     };
 
     window.switchTab = function(id) {
@@ -328,8 +337,11 @@
     function renderDays() {
       const dayBox = document.getElementById('day-buttons');
       let html = '';
-      for (let day = 1; day <= currentTripData.totalDays; day++) {
-        const isActive = day === currentTripData.activeDay;
+      const totalDays = currentTripData.totalDays || 1;
+      const activeDay = currentTripData.activeDay || 1;
+
+      for (let day = 1; day <= totalDays; day++) {
+        const isActive = day === activeDay;
         const dayDateStr = getDateForDay(day);
         html += `
           <button onclick="changeDay(${day})" class="min-w-[80px] py-2 rounded-2xl text-xs font-bold transition-all flex flex-col items-center justify-center ${
@@ -354,7 +366,7 @@
     };
 
     window.addNewDay = function() {
-      currentTripData.totalDays++;
+      currentTripData.totalDays = (currentTripData.totalDays || 0) + 1;
       if (!currentTripData.itineraryData) currentTripData.itineraryData = {};
       currentTripData.itineraryData[currentTripData.totalDays] = [];
       currentTripData.activeDay = currentTripData.totalDays;
@@ -363,7 +375,8 @@
 
     function renderItinerary() {
       const itemList = document.getElementById('itinerary-list');
-      const items = (currentTripData.itineraryData && currentTripData.itineraryData[currentTripData.activeDay]) || [];
+      const activeDay = currentTripData.activeDay || 1;
+      const items = (currentTripData.itineraryData && currentTripData.itineraryData[activeDay]) || [];
       
       if (items.length === 0) {
         itemList.innerHTML = `<div class="text-center py-8 text-xs text-gray-500 bg-white/50 rounded-2xl">ยังไม่มีแผนสำหรับวันนี้ กดปุ่มด้านล่างเพื่อเพิ่มได้เลย ✨</div>`;
@@ -379,21 +392,24 @@
     }
 
     window.addTimeSlot = function() {
+      const activeDay = currentTripData.activeDay || 1;
       if (!currentTripData.itineraryData) currentTripData.itineraryData = {};
-      if (!currentTripData.itineraryData[currentTripData.activeDay]) currentTripData.itineraryData[currentTripData.activeDay] = [];
-      currentTripData.itineraryData[currentTripData.activeDay].push({ id: Date.now(), time: '12:00', detail: '' });
+      if (!currentTripData.itineraryData[activeDay]) currentTripData.itineraryData[activeDay] = [];
+      currentTripData.itineraryData[activeDay].push({ id: Date.now(), time: '12:00', detail: '' });
       saveToFirebase();
     };
 
     window.updateTimeSlot = function(index, field, value) {
-      if (currentTripData.itineraryData[currentTripData.activeDay][index]) {
-        currentTripData.itineraryData[currentTripData.activeDay][index][field] = value;
+      const activeDay = currentTripData.activeDay || 1;
+      if (currentTripData.itineraryData[activeDay][index]) {
+        currentTripData.itineraryData[activeDay][index][field] = value;
         saveToFirebase();
       }
     };
 
     window.removeTimeSlot = function(index) {
-      currentTripData.itineraryData[currentTripData.activeDay].splice(index, 1);
+      const activeDay = currentTripData.activeDay || 1;
+      currentTripData.itineraryData[activeDay].splice(index, 1);
       saveToFirebase();
     };
 
@@ -550,7 +566,7 @@
     };
 
     function renderAllUI() {
-      document.getElementById('trip-title-display').innerText = currentTripData.title || "Shanghai 2026 🌸";
+      document.getElementById('trip-title-display').innerText = currentTripData.title || `ทริป ${currentRoomCode} 🌸`;
       document.getElementById('room-code-text').innerText = currentRoomCode;
       
       updateHeaderDateRange();
