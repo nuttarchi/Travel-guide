@@ -49,17 +49,17 @@
         </div>
 
         <!-- ฝั่งขวา: Logo, Room Code & ปุ่ม Add/Switch Trip -->
-        <div class="flex flex-col items-center gap-2 shrink-0 min-w-[90px]">
+        <div class="flex flex-col items-stretch gap-1.5 shrink-0 w-[96px]">
           
-          <!-- โลโก้ Journi มุมขวาบน -->
-          <img src="journi.png" alt="Journi Logo" class="h-12 w-12 rounded-2xl border-2 border-white bg-white shadow-sm object-cover">
+          <!-- โลโก้ Journi ปรับให้กว้างพอดีขอบ Room Code (w-full aspect-square) -->
+          <img src="journi.png" alt="Journi Logo" class="w-full aspect-square rounded-xl border-2 border-white bg-white shadow-sm object-cover">
           
-          <div onclick="copyRoomCode()" class="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-center border border-white/30 cursor-pointer hover:bg-white/30 active:scale-95 transition shadow-sm w-full" title="กดเพื่อคัดลอกรหัสห้อง">
+          <div onclick="copyRoomCode()" class="bg-white/20 backdrop-blur-sm py-1.5 rounded-xl text-center border border-white/30 cursor-pointer hover:bg-white/30 active:scale-95 transition shadow-sm w-full" title="กดเพื่อคัดลอกรหัสห้อง">
             <p class="text-[8px] text-white/90 tracking-wider">ROOM CODE 🔑</p>
             <p class="font-mono text-sm font-bold text-[#fceb9e]" id="room-code-text">SHA01</p>
           </div>
           
-          <button onclick="openTripModal()" class="bg-[#fceb9e] hover:bg-[#f5e69e] text-gray-800 text-[10px] font-bold px-2 py-1.5 rounded-xl shadow-sm active:scale-95 transition flex items-center justify-center gap-1 w-full">
+          <button onclick="openTripModal()" class="bg-[#fceb9e] hover:bg-[#f5e69e] text-gray-800 text-[10px] font-bold py-1.5 rounded-xl shadow-sm active:scale-95 transition flex items-center justify-center gap-1 w-full">
             <span>➕</span> สลับ/เพิ่มทริป
           </button>
         </div>
