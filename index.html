@@ -26,6 +26,8 @@
   <link rel="icon" type="image/png" href="journi.png">
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SortableJS สำหรับ Drag and Drop บนมือถือ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     html, body {
@@ -820,6 +822,31 @@
       renderAllUI();
     };
 
+    function initSortable() {
+      const container = document.getElementById('itinerary-list');
+      if (!container) return;
+
+      if (window.itinerarySortable) {
+        window.itinerarySortable.destroy();
+      }
+
+      window.itinerarySortable = new Sortable(container, {
+        handle: '.drag-handle',
+        animation: 200,
+        ghostClass: 'opacity-40',
+        onEnd: function (evt) {
+          const activeDay = currentTripData.activeDay || 1;
+          const currentList = currentTripData.itineraryData[activeDay];
+          if (currentList && evt.oldIndex !== undefined && evt.newIndex !== undefined) {
+            const movedItem = currentList.splice(evt.oldIndex, 1)[0];
+            currentList.splice(evt.newIndex, 0, movedItem);
+            saveState();
+            renderItinerary();
+          }
+        }
+      });
+    }
+
     function renderItinerary() {
       const itemList = document.getElementById('itinerary-list');
       const activeDay = currentTripData.activeDay || 1;
@@ -831,11 +858,18 @@
       }
       itemList.innerHTML = items.map((item, index) => `
         <div class="flex items-start gap-2 bg-white p-3 rounded-2xl shadow-sm border-l-4 border-[#7aa2ce]">
+          <div class="drag-handle cursor-grab active:cursor-grabbing text-gray-300 hover:text-[#7aa2ce] pt-2 pr-0.5 shrink-0 select-none touch-none" title="ลากเพื่อสลับลำดับ">
+            <svg class="w-4 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M7 4a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0zM7 16a2 2 0 11-4 0 2 2 0 014 0zM17 4a2 2 0 11-4 0 2 2 0 014 0zM17 10a2 2 0 11-4 0 2 2 0 014 0zM17 16a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
           <input type="time" value="${item.time}" onchange="updateTimeSlot(${index}, 'time', this.value)" class="bg-gray-50 border border-gray-200 text-[#7aa2ce] font-bold text-xs rounded-xl p-2 outline-none w-20 text-center">
           <textarea rows="2" onchange="updateTimeSlot(${index}, 'detail', this.value)" class="w-full bg-transparent text-xs text-gray-700 outline-none resize-none pt-1" placeholder="พิมพ์กิจกรรม...">${item.detail}</textarea>
           <button onclick="removeTimeSlot(${index})" class="text-gray-300 hover:text-red-500 font-bold px-1 text-xs pt-1">✕</button>
         </div>
       `).join('');
+
+      initSortable();
     }
 
     window.addTimeSlot = function() {
