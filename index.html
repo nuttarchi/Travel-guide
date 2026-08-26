@@ -21,16 +21,15 @@
 
   <div id="app-container" class="w-full max-w-md bg-[#b6e1f4] min-h-screen shadow-2xl flex flex-col relative pb-24">
     
-    <!-- ✈️ Header -->
+    <!-- Header -->
     <div class="bg-[#7aa2ce] text-white p-6 rounded-b-[2.5rem] shadow-md z-10">
       <div class="flex justify-between items-start">
         <div class="flex-1 pr-2">
-          <!-- ☘️ ปรับเปลี่ยนเป็น Travel guide ☘️ -->
           <span class="bg-[#9abde1] text-white text-[11px] px-3 py-1 rounded-full font-medium shadow-sm">
             Travel guide ☘️
           </span>
           
-          <h1 contenteditable="true" class="text-2xl font-bold mt-2 tracking-wide outline-none hover:bg-white/10 focus:bg-white/20 rounded-lg px-1 transition cursor-pointer" title="กดเพื่อแก้ไขชื่อทริป">
+          <h1 id="trip-title-display" contenteditable="true" onblur="saveCurrentTripTitle(this.innerText)" class="text-2xl font-bold mt-2 tracking-wide outline-none hover:bg-white/10 focus:bg-white/20 rounded-lg px-1 transition cursor-pointer" title="กดเพื่อแก้ไขชื่อทริป">
             Shanghai 2026 🌸
           </h1>
           
@@ -43,14 +42,21 @@
           </div>
         </div>
 
-        <div onclick="copyRoomCode()" class="bg-white/20 backdrop-blur-sm px-3 py-2 rounded-xl text-center border border-white/30 cursor-pointer hover:bg-white/30 active:scale-95 transition shadow-sm shrink-0" title="กดเพื่อคัดลอกรหัสห้อง">
-          <p class="text-[9px] text-white/90 tracking-wider">ROOM CODE 🔑</p>
-          <p class="font-mono text-sm font-bold text-[#fceb9e]" id="room-code-text">OSAKA88</p>
+        <!-- Room Code & Add/Switch Trip Button -->
+        <div class="flex flex-col items-end gap-1.5 shrink-0">
+          <div onclick="copyRoomCode()" class="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-center border border-white/30 cursor-pointer hover:bg-white/30 active:scale-95 transition shadow-sm w-full" title="กดเพื่อคัดลอกรหัสห้อง">
+            <p class="text-[8px] text-white/90 tracking-wider">ROOM CODE 🔑</p>
+            <p class="font-mono text-xs font-bold text-[#fceb9e]" id="room-code-text">SHA01</p>
+          </div>
+          
+          <button onclick="openTripModal()" class="bg-[#fceb9e] hover:bg-[#f5e69e] text-gray-800 text-[10px] font-bold px-2.5 py-1 rounded-xl shadow-sm active:scale-95 transition flex items-center gap-1">
+            <span>➕</span> สลับ/เพิ่มทริป
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- 🏷️ Navigation Tabs -->
+    <!-- Navigation Tabs -->
     <div class="flex bg-white mx-4 mt-[-18px] pt-5 pb-2 px-2 rounded-2xl shadow-sm z-0 text-sm font-medium">
       <button onclick="switchTab(1)" id="tab-btn-1" class="flex-1 py-2 text-[#7aa2ce] border-b-2 border-[#7aa2ce] font-bold transition-all">
         📍 แผนเที่ยว
@@ -63,9 +69,7 @@
       </button>
     </div>
 
-    <!-- ------------------------------------------------ -->
-    <!-- 📍 TAB 1: แผนท่องเที่ยว -->
-    <!-- ------------------------------------------------ -->
+    <!-- TAB 1: Itinerary -->
     <div id="tab-1" class="flex-1 overflow-y-auto px-4 py-4 space-y-4">
       <div class="flex gap-2 overflow-x-auto scrollbar-hide items-center py-1" id="day-buttons"></div>
       <div class="space-y-3" id="itinerary-list"></div>
@@ -74,9 +78,7 @@
       </button>
     </div>
 
-    <!-- ------------------------------------------------ -->
-    <!-- 💸 TAB 2: ค่าใช้จ่าย -->
-    <!-- ------------------------------------------------ -->
+    <!-- TAB 2: Expenses -->
     <div id="tab-2" class="hidden flex-1 overflow-y-auto px-4 py-4 space-y-4">
       <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
         <div class="flex items-center justify-between bg-gray-50 p-2.5 rounded-xl border border-gray-100">
@@ -112,9 +114,7 @@
       <div class="space-y-2" id="expense-items-list"></div>
     </div>
 
-    <!-- ------------------------------------------------ -->
-    <!-- 📁 TAB 3: เอกสาร & เช็กลิสต์ -->
-    <!-- ------------------------------------------------ -->
+    <!-- TAB 3: Checklist & Documents -->
     <div id="tab-3" class="hidden flex-1 overflow-y-auto px-4 py-4 space-y-4">
       <div class="bg-white p-4 rounded-2xl shadow-sm">
         <h3 class="font-bold text-gray-700 text-sm mb-3">สิ่งของที่ต้องเตรียม 🎒</h3>
@@ -139,7 +139,38 @@
       </div>
     </div>
 
-    <!-- 🖼️ Pop-up ดูเอกสาร / กดค้างบันทึกรูป -->
+    <!-- Room Code Modal (5 Characters) -->
+    <div id="trip-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm" onclick="closeTripModal()">
+      <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl space-y-4" onclick="event.stopPropagation()">
+        <div class="flex justify-between items-center border-b pb-3">
+          <h3 class="font-bold text-gray-800 text-base flex items-center gap-2">🔑 สลับทริป / สร้างทริปใหม่</h3>
+          <button onclick="closeTripModal()" class="text-gray-400 hover:text-gray-600 font-bold text-sm">✕</button>
+        </div>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">ใส่ Room Code (ตัวอักษร/ตัวเลข 5 หลัก):</label>
+            <input type="text" id="modal-room-input" maxlength="5" placeholder="เช่น SHA01, JPN26" class="w-full p-2.5 bg-gray-50 border border-gray-200 text-sm font-mono font-bold text-center tracking-widest text-[#7aa2ce] rounded-xl outline-none focus:border-[#7aa2ce] uppercase">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">ชื่อทริป (กรณีสร้างทริปใหม่):</label>
+            <input type="text" id="modal-title-input" placeholder="เช่น Osaka Trip 2026 🌸" class="w-full p-2.5 bg-gray-50 border border-gray-200 text-xs rounded-xl outline-none focus:border-[#7aa2ce]">
+          </div>
+
+          <button onclick="handleTripSubmit()" class="w-full py-3 bg-[#7aa2ce] text-white font-bold text-xs rounded-xl shadow-md hover:bg-[#6894c2] active:scale-95 transition-all">
+            เข้าสู่ทริป / สร้างทริปใหม่ 🚀
+          </button>
+        </div>
+
+        <div class="pt-3 border-t border-gray-100">
+          <p class="text-[11px] font-bold text-gray-500 mb-2">ทริปที่บันทึกไว้ในเครื่องนี้:</p>
+          <div id="saved-trips-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Document Modal View -->
     <div id="doc-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex flex-col items-center justify-center p-4 backdrop-blur-sm" onclick="closeDocModal()">
       <div class="relative max-w-full max-h-[85vh] flex flex-col items-center" onclick="event.stopPropagation()">
         <button onclick="closeDocModal()" class="absolute -top-12 right-0 text-white font-bold text-lg bg-white/20 hover:bg-white/40 w-9 h-9 rounded-full flex items-center justify-center transition">✕</button>
@@ -149,7 +180,7 @@
       </div>
     </div>
 
-    <!-- 📸 Export Button -->
+    <!-- Export Button -->
     <div class="fixed bottom-3 left-0 w-full px-6 flex justify-center z-20 pointer-events-none">
       <button onclick="exportToImage()" class="pointer-events-auto bg-[#7aa2ce] text-white shadow-xl px-6 py-3 rounded-full font-bold text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-transform border-2 border-white">
         📸 แคปเจอร์หน้าจอนี้
@@ -159,72 +190,154 @@
   </div>
 
   <script>
-    let activeTab = 1;
-    let activeDay = 1;
-    let totalDays = 4;
-    let startDate = "2026-12-03";
-    let travelerCount = 3;
-
     const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    let activeTab = 1;
+    let currentRoomCode = "SHA01";
 
-    let itineraryData = {
-      1: [
-        { id: 1, time: '08:00', detail: '🛬 ถึงสนามบินคันไซ (KIX) ผ่าน ตม.' },
-        { id: 2, time: '10:30', detail: '🏨 ฝากกระเป๋าที่โรงแรม ย่าน Namba' },
-        { id: 3, time: '12:00', detail: '🍜 ทานราเมงข้อสอบ Ichiran' }
-      ],
-      2: [{ id: 4, time: '09:00', detail: '🎢 Universal Studios Japan (USJ)' }],
-      3: [],
-      4: []
+    let allTrips = JSON.parse(localStorage.getItem('my_travel_trips')) || {
+      "SHA01": {
+        roomCode: "SHA01",
+        title: "Shanghai 2026 🌸",
+        startDate: "2026-12-03",
+        totalDays: 4,
+        travelerCount: 3,
+        activeDay: 1,
+        itineraryData: {
+          1: [
+            { id: 1, time: '08:00', detail: '🛬 ถึงสนามบินคันไซ (KIX) ผ่าน ตม.' },
+            { id: 2, time: '10:30', detail: '🏨 ฝากกระเป๋าที่โรงแรม ย่าน Namba' },
+            { id: 3, time: '12:00', detail: '🍜 ทานราเมงข้อสอบ Ichiran' }
+          ],
+          2: [{ id: 4, time: '09:00', detail: '🎢 Universal Studios Japan (USJ)' }],
+          3: [],
+          4: []
+        },
+        expenses: [
+          { id: 1, title: 'โรงแรม 2 คืน 🏨', amount: 6000 },
+          { id: 2, title: 'ค่าซูชิสายพาน 🍣', amount: 1500 }
+        ],
+        checklist: [
+          { id: 1, text: 'หนังสือเดินทาง (Passport) 🛂', done: true },
+          { id: 2, text: 'แลกเงินเยน (Yen) 💴', done: true },
+          { id: 3, text: 'ซื้อ Travel eSIM 📱', done: false }
+        ],
+        documents: [
+          { id: 1, name: 'IMG_0887.jpeg', icon: '📄', src: '' }
+        ]
+      }
     };
 
-    let expenses = [
-      { id: 1, title: 'โรงแรม 2 คืน 🏨', amount: 6000 },
-      { id: 2, title: 'ค่าซูชิสายพาน 🍣', amount: 1500 }
-    ];
+    function getCurrentTrip() {
+      return allTrips[currentRoomCode];
+    }
 
-    let checklist = [
-      { id: 1, text: 'หนังสือเดินทาง (Passport) 🛂', done: true },
-      { id: 2, text: 'แลกเงินเยน (Yen) 💴', done: true },
-      { id: 3, text: 'ซื้อ Travel eSIM 📱', done: false }
-    ];
-
-    let documents = [
-      { id: 1, name: 'IMG_0887.jpeg', icon: '📄', src: '' }
-    ];
+    function saveState() {
+      localStorage.setItem('my_travel_trips', JSON.stringify(allTrips));
+    }
 
     function getDateForDay(dayIndex) {
-      if (!startDate) return '';
-      const d = new Date(startDate);
+      const trip = getCurrentTrip();
+      if (!trip.startDate) return '';
+      const d = new Date(trip.startDate);
       d.setDate(d.getDate() + (dayIndex - 1));
       return `${d.getDate()} ${monthsEN[d.getMonth()]}`;
     }
 
     function updateHeaderDateRange() {
-      if (!startDate) return;
-      const start = new Date(startDate);
-      const end = new Date(startDate);
-      end.setDate(end.getDate() + (totalDays - 1));
+      const trip = getCurrentTrip();
+      if (!trip.startDate) return;
+      const start = new Date(trip.startDate);
+      const end = new Date(trip.startDate);
+      end.setDate(end.getDate() + (trip.totalDays - 1));
 
       const startStr = `${start.getDate()} ${monthsEN[start.getMonth()]}`;
       const endStr = `${end.getDate()} ${monthsEN[end.getMonth()]} ${end.getFullYear()}`;
       
-      document.getElementById('date-range-display').innerText = `🗓️ ${startStr} - ${endStr} (${totalDays} วัน)`;
+      document.getElementById('date-range-display').innerText = `🗓️ ${startStr} - ${endStr} (${trip.totalDays} วัน)`;
+      document.getElementById('start-date-picker').value = trip.startDate;
     }
 
     function onStartDateChange(val) {
-      startDate = val;
+      const trip = getCurrentTrip();
+      trip.startDate = val;
+      saveState();
       updateHeaderDateRange();
       renderDays();
     }
 
+    function saveCurrentTripTitle(newTitle) {
+      const trip = getCurrentTrip();
+      trip.title = newTitle.trim() || "ทริปของฉัน 🌸";
+      saveState();
+    }
+
     function copyRoomCode() {
-      const code = document.getElementById('room-code-text').innerText;
-      navigator.clipboard.writeText(code).then(() => {
-        alert(`คัดลอกรหัสห้อง [ ${code} ] เรียบร้อยแล้ว! 🔑`);
+      navigator.clipboard.writeText(currentRoomCode).then(() => {
+        alert(`คัดลอกรหัสห้อง [ ${currentRoomCode} ] เรียบร้อยแล้ว! 🔑`);
       }).catch(() => {
-        alert(`รหัสห้องคือ: ${code}`);
+        alert(`รหัสห้องคือ: ${currentRoomCode}`);
       });
+    }
+
+    function openTripModal() {
+      document.getElementById('modal-room-input').value = '';
+      document.getElementById('modal-title-input').value = '';
+      renderSavedTripsList();
+      document.getElementById('trip-modal').classList.remove('hidden');
+    }
+
+    function closeTripModal() {
+      document.getElementById('trip-modal').classList.add('hidden');
+    }
+
+    function renderSavedTripsList() {
+      const container = document.getElementById('saved-trips-list');
+      const codes = Object.keys(allTrips);
+      container.innerHTML = codes.map(code => `
+        <div onclick="switchRoomCode('${code}')" class="flex justify-between items-center bg-gray-50 hover:bg-[#b6e1f4]/30 p-2 rounded-xl cursor-pointer border border-gray-100 transition">
+          <span class="font-bold text-xs text-gray-700">${allTrips[code].title}</span>
+          <span class="font-mono text-xs font-bold text-[#7aa2ce] bg-white px-2 py-0.5 rounded-md border">${code}</span>
+        </div>
+      `).join('');
+    }
+
+    function handleTripSubmit() {
+      const codeInput = document.getElementById('modal-room-input').value.trim().toUpperCase();
+      const titleInput = document.getElementById('modal-title-input').value.trim();
+
+      if (codeInput.length !== 5) {
+        alert("กรุณากรอก Room Code ให้ครบ 5 หลัก (ตัวอักษรหรือตัวเลข) ครับ!");
+        return;
+      }
+
+      if (allTrips[codeInput]) {
+        switchRoomCode(codeInput);
+      } else {
+        const newTitle = titleInput || `ทริป ${codeInput} 🌸`;
+        allTrips[codeInput] = {
+          roomCode: codeInput,
+          title: newTitle,
+          startDate: "2026-12-03",
+          totalDays: 3,
+          travelerCount: 2,
+          activeDay: 1,
+          itineraryData: { 1: [], 2: [], 3: [] },
+          expenses: [],
+          checklist: [],
+          documents: []
+        };
+        saveState();
+        switchRoomCode(codeInput);
+      }
+    }
+
+    function switchRoomCode(code) {
+      if (allTrips[code]) {
+        currentRoomCode = code;
+        closeTripModal();
+        renderAllUI();
+      }
     }
 
     function switchTab(id) {
@@ -238,10 +351,11 @@
     }
 
     function renderDays() {
+      const trip = getCurrentTrip();
       const dayBox = document.getElementById('day-buttons');
       let html = '';
-      for (let day = 1; day <= totalDays; day++) {
-        const isActive = day === activeDay;
+      for (let day = 1; day <= trip.totalDays; day++) {
+        const isActive = day === trip.activeDay;
         const dayDateStr = getDateForDay(day);
         html += `
           <button onclick="changeDay(${day})" class="min-w-[80px] py-2 rounded-2xl text-xs font-bold transition-all flex flex-col items-center justify-center ${
@@ -261,21 +375,27 @@
     }
 
     function changeDay(day) {
-      activeDay = day;
+      const trip = getCurrentTrip();
+      trip.activeDay = day;
+      saveState();
       renderDays();
       renderItinerary();
     }
 
     function addNewDay() {
-      totalDays++;
-      itineraryData[totalDays] = [];
+      const trip = getCurrentTrip();
+      trip.totalDays++;
+      trip.itineraryData[trip.totalDays] = [];
+      saveState();
       updateHeaderDateRange();
-      changeDay(totalDays);
+      changeDay(trip.totalDays);
     }
 
     function renderItinerary() {
+      const trip = getCurrentTrip();
       const itemList = document.getElementById('itinerary-list');
-      const items = itineraryData[activeDay] || [];
+      const items = trip.itineraryData[trip.activeDay] || [];
+      
       if (items.length === 0) {
         itemList.innerHTML = `<div class="text-center py-8 text-xs text-gray-500 bg-white/50 rounded-2xl">ยังไม่มีแผนสำหรับวันนี้ กดปุ่มด้านล่างเพื่อเพิ่มได้เลย ✨</div>`;
         return;
@@ -290,42 +410,50 @@
     }
 
     function addTimeSlot() {
-      if (!itineraryData[activeDay]) itineraryData[activeDay] = [];
-      itineraryData[activeDay].push({ id: Date.now(), time: '12:00', detail: '' });
+      const trip = getCurrentTrip();
+      if (!trip.itineraryData[trip.activeDay]) trip.itineraryData[trip.activeDay] = [];
+      trip.itineraryData[trip.activeDay].push({ id: Date.now(), time: '12:00', detail: '' });
+      saveState();
       renderItinerary();
     }
 
     function updateTimeSlot(index, field, value) {
-      if (itineraryData[activeDay] && itineraryData[activeDay][index]) {
-        itineraryData[activeDay][index][field] = value;
+      const trip = getCurrentTrip();
+      if (trip.itineraryData[trip.activeDay] && trip.itineraryData[trip.activeDay][index]) {
+        trip.itineraryData[trip.activeDay][index][field] = value;
+        saveState();
       }
     }
 
     function removeTimeSlot(index) {
-      itineraryData[activeDay].splice(index, 1);
+      const trip = getCurrentTrip();
+      trip.itineraryData[trip.activeDay].splice(index, 1);
+      saveState();
       renderItinerary();
     }
 
     function updateTravelerCount(val) {
-      travelerCount = parseInt(val) || 1;
-      if (travelerCount < 1) travelerCount = 1;
+      const trip = getCurrentTrip();
+      trip.travelerCount = parseInt(val) || 1;
+      if (trip.travelerCount < 1) trip.travelerCount = 1;
+      saveState();
       renderExpenses();
     }
 
     function renderExpenses() {
+      const trip = getCurrentTrip();
       const list = document.getElementById('expense-items-list');
+      document.getElementById('traveler-count').value = trip.travelerCount;
+
       let total = 0;
+      trip.expenses.forEach(e => total += e.amount);
 
-      expenses.forEach(e => {
-        total += e.amount;
-      });
-
-      const perPerson = travelerCount > 0 ? total / travelerCount : 0;
+      const perPerson = trip.travelerCount > 0 ? total / trip.travelerCount : 0;
 
       document.getElementById('total-expense').innerText = `฿ ${total.toLocaleString()}`;
       document.getElementById('per-person-expense').innerText = `฿ ${Math.round(perPerson).toLocaleString()}`;
 
-      list.innerHTML = expenses.map((e, index) => `
+      list.innerHTML = trip.expenses.map((e, index) => `
         <div class="bg-white p-3 rounded-2xl shadow-sm flex justify-between items-center text-xs">
           <span class="font-bold text-gray-800">${e.title}</span>
           <div class="flex items-center gap-2">
@@ -337,6 +465,7 @@
     }
 
     function addExpense() {
+      const trip = getCurrentTrip();
       const titleInput = document.getElementById('exp-title');
       const amountInput = document.getElementById('exp-amount');
 
@@ -344,7 +473,8 @@
       const amount = parseFloat(amountInput.value);
 
       if (title && amount) {
-        expenses.push({ id: Date.now(), title, amount });
+        trip.expenses.push({ id: Date.now(), title, amount });
+        saveState();
         titleInput.value = '';
         amountInput.value = '';
         renderExpenses();
@@ -352,13 +482,16 @@
     }
 
     function removeExpense(index) {
-      expenses.splice(index, 1);
+      const trip = getCurrentTrip();
+      trip.expenses.splice(index, 1);
+      saveState();
       renderExpenses();
     }
 
     function renderChecklist() {
+      const trip = getCurrentTrip();
       const container = document.getElementById('checklist-container');
-      container.innerHTML = checklist.map((item, index) => `
+      container.innerHTML = trip.checklist.map((item, index) => `
         <div class="flex items-center justify-between bg-gray-50 p-2.5 rounded-xl border border-gray-100">
           <label class="flex items-center gap-2.5 text-xs text-gray-700 cursor-pointer flex-1">
             <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleCheck(${index})" class="w-4 h-4 accent-[#7aa2ce] rounded">
@@ -370,28 +503,35 @@
     }
 
     function toggleCheck(index) {
-      checklist[index].done = !checklist[index].done;
+      const trip = getCurrentTrip();
+      trip.checklist[index].done = !trip.checklist[index].done;
+      saveState();
       renderChecklist();
     }
 
     function addChecklistItem() {
+      const trip = getCurrentTrip();
       const input = document.getElementById('new-check-item');
       const text = input.value.trim();
       if (text) {
-        checklist.push({ id: Date.now(), text, done: false });
+        trip.checklist.push({ id: Date.now(), text, done: false });
+        saveState();
         input.value = '';
         renderChecklist();
       }
     }
 
     function removeChecklistItem(index) {
-      checklist.splice(index, 1);
+      const trip = getCurrentTrip();
+      trip.checklist.splice(index, 1);
+      saveState();
       renderChecklist();
     }
 
     function renderDocuments() {
+      const trip = getCurrentTrip();
       const grid = document.getElementById('doc-grid');
-      grid.innerHTML = documents.map((doc, index) => `
+      grid.innerHTML = trip.documents.map((doc, index) => `
         <div onclick="openDocModal(${index})" class="relative bg-gray-50 border border-gray-200 p-2 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[#7aa2ce] transition group">
           <button onclick="event.stopPropagation(); removeDocument(${index})" class="absolute top-1 right-1 bg-white/80 hover:bg-red-500 hover:text-white text-gray-400 text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold transition z-10">✕</button>
           ${doc.src 
@@ -404,11 +544,13 @@
     }
 
     function uploadDoc(e) {
+      const trip = getCurrentTrip();
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
-          documents.push({ id: Date.now(), name: file.name, icon: '📄', src: evt.target.result });
+          trip.documents.push({ id: Date.now(), name: file.name, icon: '📄', src: evt.target.result });
+          saveState();
           renderDocuments();
         };
         reader.readAsDataURL(file);
@@ -416,12 +558,15 @@
     }
 
     function removeDocument(index) {
-      documents.splice(index, 1);
+      const trip = getCurrentTrip();
+      trip.documents.splice(index, 1);
+      saveState();
       renderDocuments();
     }
 
     function openDocModal(index) {
-      const doc = documents[index];
+      const trip = getCurrentTrip();
+      const doc = trip.documents[index];
       if (!doc || !doc.src) {
         alert("ยังไม่มีไฟล์รูปภาพสำหรับเอกสารนี้ครับ สามารถอัปโหลดใหม่ได้เลย ✨");
         return;
@@ -444,21 +589,26 @@
       const container = document.getElementById('app-container');
       html2canvas(container, { scale: 2, backgroundColor: "#b6e1f4" }).then(canvas => {
         let a = document.createElement('a');
-        a.download = 'my-trip-planner.png';
+        a.download = `${currentRoomCode}-trip-plan.png`;
         a.href = canvas.toDataURL();
         a.click();
       });
     }
 
-    // Init
-    document.getElementById('start-date-picker').value = startDate;
-    updateHeaderDateRange();
+    function renderAllUI() {
+      const trip = getCurrentTrip();
+      document.getElementById('trip-title-display').innerText = trip.title;
+      document.getElementById('room-code-text').innerText = trip.roomCode;
+      
+      updateHeaderDateRange();
+      renderDays();
+      renderItinerary();
+      renderExpenses();
+      renderChecklist();
+      renderDocuments();
+    }
 
-    renderDays();
-    renderItinerary();
-    renderExpenses();
-    renderChecklist();
-    renderDocuments();
+    renderAllUI();
   </script>
 </body>
 </html>
