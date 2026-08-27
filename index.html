@@ -26,7 +26,7 @@
   <link rel="icon" type="image/png" href="journi.png">
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SortableJS สำหรับ Drag and Drop บนมือถือ -->
+  <!-- SortableJS สำหรับ Drag and Drop แพลนเวลาและปุ่มวัน -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -781,6 +781,57 @@
       document.getElementById('start-date-picker').value = currentTripData.startDate;
     }
 
+    function initDaySortable() {
+      const dayBox = document.getElementById('day-buttons');
+      if (!dayBox) return;
+
+      if (window.daySortable) {
+        window.daySortable.destroy();
+      }
+
+      window.daySortable = new Sortable(dayBox, {
+        draggable: '.day-tab',
+        animation: 200,
+        delay: 150,
+        delayOnTouchOnly: true,
+        ghostClass: 'opacity-40',
+        onEnd: function(evt) {
+          if (evt.oldIndex === undefined || evt.newIndex === undefined || evt.oldIndex === evt.newIndex) return;
+
+          let daysArray = [];
+          for (let d = 1; d <= currentTripData.totalDays; d++) {
+            daysArray.push(currentTripData.itineraryData[d] || []);
+          }
+
+          const moved = daysArray.splice(evt.oldIndex, 1)[0];
+          daysArray.splice(evt.newIndex, 0, moved);
+
+          let newItineraryData = {};
+          daysArray.forEach((items, idx) => {
+            newItineraryData[idx + 1] = items;
+          });
+          currentTripData.itineraryData = newItineraryData;
+
+          if (currentTripData.activeDay === (evt.oldIndex + 1)) {
+            currentTripData.activeDay = evt.newIndex + 1;
+          } else if (
+            currentTripData.activeDay > (evt.oldIndex + 1) &&
+            currentTripData.activeDay <= (evt.newIndex + 1)
+          ) {
+            currentTripData.activeDay -= 1;
+          } else if (
+            currentTripData.activeDay < (evt.oldIndex + 1) &&
+            currentTripData.activeDay >= (evt.newIndex + 1)
+          ) {
+            currentTripData.activeDay += 1;
+          }
+
+          saveState();
+          renderAllUI();
+        }
+      });
+    }
+
     function renderDays() {
       const dayBox = document.getElementById('day-buttons');
       let html = '';
@@ -791,7 +842,7 @@
         const isActive = day === activeDay;
         const dayDateStr = getDateForDay(day);
         html += `
-          <button onclick="changeDay(${day})" class="min-w-[80px] py-2 rounded-2xl text-xs font-bold transition-all flex flex-col items-center justify-center ${
+          <button onclick="changeDay(${day})" class="day-tab min-w-[80px] py-2 rounded-2xl text-xs font-bold transition-all flex flex-col items-center justify-center select-none cursor-grab active:cursor-grabbing ${
             isActive ? 'bg-[#fceb9e] text-gray-800 shadow-sm' : 'bg-[#9abde1] text-white opacity-80 hover:opacity-100'
           }">
             <span>Day ${day} 🌸</span>
@@ -805,6 +856,7 @@
         </button>
       `;
       dayBox.innerHTML = html;
+      initDaySortable();
     }
 
     window.changeDay = function(day) {
