@@ -351,7 +351,7 @@
         </div>
       </div>
 
-      <!-- 🇯🇵 หมวดภาษาญี่ปุ่น -->
+      <!-- 🇯 সাংস্কৃতিক หมวดภาษาญี่ปุ่น -->
       <div id="vocab-ja" class="hidden space-y-4">
         <!-- การถามทาง -->
         <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
@@ -908,8 +908,9 @@
         itemList.innerHTML = `<div class="text-center py-8 text-xs text-gray-500 bg-white/50 rounded-2xl">ยังไม่มีแผนสำหรับวันนี้ กดปุ่มด้านล่างเพื่อเพิ่มได้เลย ✨</div>`;
         return;
       }
+      // 💡 ใช้ CSS group-focus-within ควบคุมการโชว์/ซ่อนช่องลิ้งค์อัตโนมัติ
       itemList.innerHTML = items.map((item, index) => `
-        <div class="flex items-start gap-2 bg-white p-3 rounded-2xl shadow-sm border-l-4 border-[#7aa2ce]">
+        <div class="group flex items-start gap-2 bg-white p-3 rounded-2xl shadow-sm border-l-4 border-[#7aa2ce] transition-all">
           <div class="drag-handle cursor-grab active:cursor-grabbing text-gray-300 hover:text-[#7aa2ce] pt-2 pr-0.5 shrink-0 select-none touch-none" title="ลากเพื่อสลับลำดับ">
             <svg class="w-4 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M7 4a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0zM7 16a2 2 0 11-4 0 2 2 0 014 0zM17 4a2 2 0 11-4 0 2 2 0 014 0zM17 10a2 2 0 11-4 0 2 2 0 014 0zM17 16a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -918,14 +919,14 @@
           
           <div class="flex flex-col w-full gap-2">
             <div class="flex items-start gap-2">
-              <input type="time" value="${item.time}" onchange="updateTimeSlot(${index}, 'time', this.value)" class="bg-gray-50 border border-gray-200 text-[#7aa2ce] font-bold text-xs rounded-xl p-2 outline-none w-20 text-center">
+              <input type="time" value="${item.time}" onchange="updateTimeSlot(${index}, 'time', this.value)" class="bg-gray-50 border border-gray-200 text-[#7aa2ce] font-bold text-xs rounded-xl p-2 outline-none w-20 text-center transition-colors focus:border-[#7aa2ce]">
               <textarea rows="2" onchange="updateTimeSlot(${index}, 'detail', this.value)" class="w-full bg-transparent text-xs text-gray-700 outline-none resize-none pt-1" placeholder="พิมพ์กิจกรรม...">${item.detail}</textarea>
-              <button onclick="removeTimeSlot(${index})" class="text-gray-300 hover:text-red-500 font-bold px-1 text-xs pt-1">✕</button>
+              <button onclick="removeTimeSlot(${index})" class="text-gray-300 hover:text-red-500 font-bold px-1 text-xs pt-1 transition-colors">✕</button>
             </div>
             
-            <div class="flex items-center gap-1.5 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
+            <div class="${item.mapUrl ? 'flex' : 'hidden group-focus-within:flex'} items-center gap-1.5 bg-gray-50 p-1.5 rounded-xl border border-gray-100 transition-all">
               <span class="text-[10px] pl-1">📍</span>
-              <input type="url" value="${item.mapUrl || ''}" onchange="updateTimeSlot(${index}, 'mapUrl', this.value)" placeholder="วางลิ้งค์ Google Maps (ถ้ามี)..." class="flex-1 bg-transparent text-[10px] text-[#7aa2ce] outline-none w-full placeholder:text-gray-400">
+              <input type="url" value="${item.mapUrl || ''}" onchange="updateTimeSlot(${index}, 'mapUrl', this.value)" placeholder="วางลิ้งค์แผนที่ (Google/Apple/Baidu)..." class="flex-1 bg-transparent text-[10px] text-[#7aa2ce] outline-none w-full placeholder:text-gray-400">
               ${item.mapUrl ? `<a href="${item.mapUrl}" target="_blank" class="bg-[#fceb9e] text-gray-800 text-[10px] font-bold px-3 py-1.5 rounded-lg hover:bg-[#f5e69e] active:scale-95 transition shadow-sm whitespace-nowrap flex items-center gap-1">นำทาง 🚀</a>` : ''}
             </div>
           </div>
