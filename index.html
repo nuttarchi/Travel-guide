@@ -925,15 +925,12 @@
               <button onclick="removeTimeSlot(${index})" class="text-gray-300 hover:text-red-500 font-bold px-1 text-xs pt-1 transition-colors">✕</button>
             </div>
             
-            <div class="${item.mapUrl ? 'flex flex-wrap' : 'hidden group-focus-within:flex'} items-center gap-2 w-full transition-all mt-1">
-              
-              <div class="${item.mapUrl ? 'hidden group-focus-within:flex' : 'flex'} flex-1 items-center bg-gray-50 p-1.5 rounded-xl border border-gray-100 min-w-[150px]">
+            <div class="${item.mapUrl ? 'flex flex-col' : 'hidden group-focus-within:flex flex-col'} gap-1.5 w-full transition-all mt-1">
+              <div class="${item.mapUrl ? 'hidden group-focus-within:flex' : 'flex'} w-full items-center bg-gray-50 p-1.5 rounded-xl border border-gray-100">
                 <span class="text-[10px] pl-1 pr-1.5 text-gray-400">🔗</span>
                 <input type="url" value="${item.mapUrl || ''}" onchange="updateTimeSlot(${index}, 'mapUrl', this.value)" placeholder="วางลิ้งค์แผนที่ (Google/Apple/Baidu)..." class="flex-1 bg-transparent text-[10px] text-[#7aa2ce] outline-none w-full placeholder:text-gray-400">
               </div>
-              
-              ${item.mapUrl ? `<a href="${item.mapUrl}" target="_blank" class="bg-[#fceb9e] text-gray-800 text-[10px] font-bold px-3 py-1.5 rounded-lg hover:bg-[#f5e69e] active:scale-95 transition shadow-sm whitespace-nowrap flex items-center gap-1 shrink-0">📍 นำทาง 🚀</a>` : ''}
-              
+              ${item.mapUrl ? `<a href="${item.mapUrl}" target="_blank" class="w-full bg-[#fceb9e] text-gray-800 text-[11px] font-bold px-3 py-2 rounded-xl hover:bg-[#f5e69e] active:scale-95 transition shadow-sm flex items-center justify-center gap-1.5">📍 นำทาง 🚀</a>` : ''}
             </div>
           </div>
         </div>
